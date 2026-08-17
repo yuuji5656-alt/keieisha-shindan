@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="経営判断の傾向と、現在の経営課題を分けて整理する経営者診断の試作版です。">
   <title>経営者の現在地診断｜試作版</title>
-  <link rel="stylesheet" href="./styles.css?v=20260817-3">
+  <link rel="stylesheet" href="./styles.css?v=20260817-4">
 </head>
 <body>
   <header class="site-header">
@@ -51,11 +51,16 @@
       </div>
       <aside class="hero-card" aria-label="診断結果の見本">
         <div class="card-topline"><span>診断結果の見本</span><span>01</span></div>
-        <div class="sample-orbit">
-          <span class="orbit-word">構想</span><span class="orbit-word">市場</span><span class="orbit-word">組織</span>
-          <div class="sample-core"><small>第1傾向</small><strong>事業開拓型</strong><span>仮名称</span></div>
+        <div class="radar-wrap sample-radar" aria-label="能力値の見本。構想力88、行動力82、販売力74、組織力48、財務力42、継続力57">
+          <svg class="radar-chart" viewBox="0 0 360 330" role="img" aria-hidden="true">
+            <g class="radar-grid"><polygon points="180,45 297,113 297,248 180,315 63,248 63,113"/><polygon points="180,79 268,130 268,231 180,281 92,231 92,130"/><polygon points="180,113 239,147 239,214 180,248 121,214 121,147"/><line x1="180" y1="180" x2="180" y2="45"/><line x1="180" y1="180" x2="297" y2="113"/><line x1="180" y1="180" x2="297" y2="248"/><line x1="180" y1="180" x2="180" y2="315"/><line x1="180" y1="180" x2="63" y2="248"/><line x1="180" y1="180" x2="63" y2="113"/></g>
+            <polygon class="radar-area" points="180,61 276,125 267,231 180,257 131,208 113,141"/>
+            <g class="radar-dots"><circle cx="180" cy="61" r="4"/><circle cx="276" cy="125" r="4"/><circle cx="267" cy="231" r="4"/><circle cx="180" cy="257" r="4"/><circle cx="131" cy="208" r="4"/><circle cx="113" cy="141" r="4"/></g>
+            <g class="radar-labels"><text x="180" y="18">構想力 88</text><text x="307" y="105">行動力 82</text><text x="311" y="268">販売力 74</text><text x="180" y="328">組織力 48</text><text x="49" y="268">財務力 42</text><text x="45" y="105">継続力 57</text></g>
+          </svg>
+          <div class="radar-center"><small>第1傾向</small><strong>事業開拓型</strong></div>
         </div>
-        <p>新しい顧客課題を見つけ、事業の形にするとき力が出る経営者。</p>
+        <p>能力の強弱と、力を発揮しやすい経営スタイルが一目で分かります。</p>
       </aside>
     </section>
 
@@ -159,6 +164,7 @@
         <article class="result-card result-card-wide ability-card">
           <span class="section-number">06</span><h2>経営能力値</h2>
           <p class="muted">今回の答えから見た、今のあなたの力の出方です。100点満点の優劣ではなく、どこへ力を使いやすいかを表します。</p>
+          <div id="ability-radar" class="result-radar"></div>
           <div id="ability-stats" class="ability-stats"></div>
         </article>
         <article class="result-card result-card-wide historical-card">
@@ -187,7 +193,7 @@
   </main>
 
   <footer><span>経営者の現在地診断・試作版</span><span>診断 → 自己理解 → 課題発見 → 解決策</span></footer>
-  <script src="./app.js?v=20260817-2" defer></script>
+  <script src="./app.js?v=20260817-4" defer></script>
 </body>
 </html>
 
