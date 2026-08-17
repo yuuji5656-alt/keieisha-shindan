@@ -300,15 +300,26 @@ function shareText() {
   return `経営者の現在地診断をやってみました。\n私のタイプは「${name}」\n${abilities}\nあなたはどのタイプ？`;
 }
 
+function sharedResultUrl() {
+  const type = $("main-name").textContent;
+  const tagline = $("main-tagline").textContent;
+  const abilities = [...document.querySelectorAll(".ability-stat")].slice(0, 6).map(card => ({
+    name: card.querySelector("strong").textContent,
+    value: Number(card.querySelector(".ability-head span").textContent.replace(/\D/g, ""))
+  }));
+  const params = new URLSearchParams({ type, tagline, abilities: abilities.map(item => `${item.name}:${item.value}`).join(",") });
+  return new URL(`./share-result.html?${params}`, window.location.href).href;
+}
+
 function prepareShareLinks() {
   const text = shareText();
-  const url = window.location.href.split("#")[0];
+  const url = sharedResultUrl();
   $("line-share").href = `https://line.me/R/msg/text/?${encodeURIComponent(`${text}\n${url}`)}`;
   $("x-share").href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
 }
 
 async function shareResult() {
-  const data = { title: "経営者の現在地診断", text: shareText(), url: window.location.href.split("#")[0] };
+  const data = { title: "経営者の現在地診断結果", text: shareText(), url: sharedResultUrl() };
   if (navigator.share) {
     try { await navigator.share(data); $("share-status").textContent = "共有画面を開きました。"; return; } catch (error) { if (error.name === "AbortError") return; }
   }
@@ -316,7 +327,7 @@ async function shareResult() {
 }
 
 async function copyResult() {
-  try { await navigator.clipboard.writeText(`${shareText()}\n${window.location.href.split("#")[0]}`); $("share-status").textContent = "結果をコピーしました。LINEやSNSに貼り付けられます。"; }
+  try { await navigator.clipboard.writeText(`${shareText()}\n${sharedResultUrl()}`); $("share-status").textContent = "診断結果のURLをコピーしました。LINEやSNSに貼り付けられます。"; }
   catch { $("share-status").textContent = "コピーできませんでした。LINEまたはXのボタンをお使いください。"; }
 }
 
