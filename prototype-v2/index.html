@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f8f1e7">
+  <title>ねこ社長の経営タイプ診断</title>
+  <meta name="description" content="12問で、あなたの経営タイプと今やるべきことがわかる無料診断です。">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top"><span>ねこ社長の</span>経営タイプ診断</a>
+    <span class="header-note">無料・約3分</span>
+  </header>
+
+  <main id="top">
+    <section id="landing" class="screen active">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">むずかしい言葉、ほぼなし。</p>
+          <h1>あなたは、<br><em>どんな社長？</em></h1>
+          <p class="lead">12の場面を選ぶだけ。得意なこと、つまずきやすいこと、明日からの動き方まで猫たちが案内します。</p>
+          <button class="primary-btn" id="startBtn">無料で診断をはじめる <span>→</span></button>
+          <p class="microcopy">名前はニックネームでも大丈夫です</p>
+        </div>
+        <div class="hero-art" aria-label="白猫と黒猫の案内役">
+          <img src="assets/cat-guides.jpg" alt="短い手足の白猫と、すっきりした黒猫">
+          <span class="bubble white-bubble">いっしょに<br>考えよう</span>
+          <span class="bubble black-bubble">結果は私が<br>整理します</span>
+        </div>
+      </div>
+
+      <section class="sample-section">
+        <div class="section-heading"><span>診断すると</span><h2>こんなことが分かります</h2></div>
+        <div class="benefit-grid">
+          <article><span class="num">01</span><h3>あなたの経営タイプ</h3><p>10タイプから、いちばん近い型と二番目の型を表示。</p></article>
+          <article><span class="num">02</span><h3>得意・不得意</h3><p>100点満点の図で、ひと目で分かるようにします。</p></article>
+          <article><span class="num">03</span><h3>傾向と対策</h3><p>なぜそうなったかと、今すぐできる一歩を提案。</p></article>
+        </div>
+        <div class="sample-result">
+          <div class="sample-label">結果の見本</div>
+          <div><p class="small-label">あなたは</p><h3>事業開拓型</h3><p>思いついたら、まず道をつくる人。</p></div>
+          <div class="mini-radar" aria-label="能力の見本"><span style="--n:78%">開拓力 78</span><span style="--n:62%">販売力 62</span><span style="--n:45%">組織力 45</span></div>
+        </div>
+      </section>
+
+      <section class="story-intro">
+        <div class="cat-stamp cat-black"></div>
+        <div><p class="eyebrow">診断の、その先へ</p><h2>頭の中の事業を、<br>伝わる物語に。</h2><p>診断で「考えはあるのに、うまく伝わらない」と分かった方には、事業構想を人に伝わる物語へ変える方法もご案内します。</p></div>
+        <a class="secondary-btn" href="../prototype/story-preview.html">事業計画小説を1話読んでみる</a>
+      </section>
+    </section>
+
+    <section id="profile" class="screen form-screen">
+      <div class="guide-row"><div class="cat-face cat-white"></div><div class="guide-talk">まずは、結果に表示する名前だけ教えてね。</div></div>
+      <div class="card profile-card">
+        <p class="step-label">はじめる前に</p><h2>あなたのこと</h2>
+        <label>お名前・ニックネーム<input id="nameInput" type="text" maxlength="20" placeholder="例：ゆうじ"></label>
+        <label>今の事業の段階<select id="stageInput"><option value="">選ばなくても大丈夫</option><option>これから始める</option><option>始めたばかり</option><option>売上を伸ばしている</option><option>人や組織を増やしている</option><option>次の事業を考えている</option></select></label>
+        <button class="primary-btn full" id="profileNext">質問へ進む <span>→</span></button>
+      </div>
+    </section>
+
+    <section id="quiz" class="screen quiz-screen">
+      <div class="progress-wrap"><div class="progress-meta"><span id="progressText">1 / 12</span><span id="chapterText">まずは、いつものあなた</span></div><div class="progress"><i id="progressBar"></i></div></div>
+      <div class="guide-row compact"><div class="cat-face cat-white"></div><div class="guide-talk" id="catTalk">深く考えず、近い方を選んでね。</div></div>
+      <div class="question-card">
+        <p id="questionScene" class="scene-label"></p>
+        <h2 id="questionText"></h2>
+        <div id="answers" class="answers"></div>
+      </div>
+    </section>
+
+    <section id="issues" class="screen form-screen">
+      <div class="guide-row"><div class="cat-face cat-black"></div><div class="guide-talk">タイプとは別に、いま困っていることも整理しましょう。</div></div>
+      <div class="card issue-card">
+        <p class="step-label">あと少し</p><h2>いま、一番気になることは？</h2><p>2つまで選べます。</p>
+        <div id="issueChoices" class="issue-choices"></div>
+        <button class="primary-btn full" id="showResult">結果を見る <span>→</span></button>
+      </div>
+    </section>
+
+    <section id="result" class="screen result-screen">
+      <div class="result-hero">
+        <div class="cat-face cat-black large"></div><p class="result-owner"><span id="resultName"></span>さんの診断結果</p><p class="small-label">あなたは</p><h1 id="typeName"></h1><p id="typeTagline" class="type-tagline"></p>
+        <div id="typeRanking" class="type-ranking"></div>
+      </div>
+
+      <div class="result-layout">
+        <article class="result-card chart-card"><div class="card-title"><span>能力の見取り図</span><h2>得意・不得意</h2></div><canvas id="radar" width="520" height="420"></canvas><div id="abilityList" class="ability-list"></div><p class="chart-note">点数は回答から見た「今の傾向」です。人としての優劣ではありません。</p></article>
+        <article class="result-card"><div class="card-title"><span>今回の回答から</span><h2>こう判断しました</h2></div><div id="evidenceList" class="evidence-list"></div></article>
+        <article class="result-card advice-card"><div class="card-title"><span>あなたの取扱説明書</span><h2>傾向と対策</h2></div><div class="advice-grid"><section><h3>伸ばしたい強み</h3><p id="strengthText"></p></section><section><h3>気をつけたいこと</h3><p id="riskText"></p></section><section class="wide"><h3>うまく進むコツ</h3><p id="counterText"></p></section></div></article>
+        <article class="result-card today-card"><span class="today-label">今日からの一歩</span><h2 id="todayTitle"></h2><p id="todayText"></p></article>
+        <article class="result-card issue-result"><div class="card-title"><span>タイプとは別に</span><h2>いまの経営課題</h2></div><div id="selectedIssues"></div><p id="issueAdvice"></p></article>
+      </div>
+
+      <section class="story-offer">
+        <div class="story-cat"><div class="cat-face cat-white large"></div></div>
+        <div><p class="eyebrow">もし、こんなことがあるなら</p><h2>頭の中では見えているのに、<br>人に話すとうまく伝わらない。</h2><p id="storyReason"></p><p>事業計画小説は、経営者の構想を社員・仲間・お客様にも見える物語へ変える方法です。まずは無料公開中の「第1章・第1話」で、どんなものか確かめてください。</p><div class="offer-actions"><a class="primary-btn link-btn" href="../prototype/story-preview.html">無料で第1話を読む <span>→</span></a><a class="text-link" href="../prototype/story-plan.html">考え方を詳しく見る</a></div></div>
+      </section>
+
+      <section class="share-card"><h2>結果を友だちに送る</h2><p>結果だけが見られる専用ページを共有できます。</p><div class="share-buttons"><button id="nativeShare">共有する</button><button id="lineShare">LINE</button><button id="xShare">X</button><button id="copyShare">リンクをコピー</button></div><p id="shareStatus" aria-live="polite"></p></section>
+      <button class="retry-btn" id="retryBtn">もう一度診断する</button>
+    </section>
+  </main>
+  <footer>この診断は医療・心理検査ではなく、経営の振り返りを助けるためのものです。</footer>
+  <script src="app.js"></script>
+</body>
+</html>
