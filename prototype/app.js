@@ -270,8 +270,28 @@ function renderAbilities(normalized) {
   const spread = Math.sqrt(baseValues.reduce((sum, item) => sum + Math.pow(item.base - average, 2), 0) / baseValues.length) || 1;
   const values = baseValues.map(item => ({ ...item, value: Math.max(10, Math.min(95, Math.round(50 + (item.base - average) / spread * 17))) }));
   const topValue = Math.max(...values.map(item => item.value));
+  renderAbilityRadar(values);
   const level = value => value >= 75 ? "とても得意" : value >= 60 ? "得意" : value >= 40 ? "標準" : value >= 25 ? "少し苦手" : "後回しにしやすい";
   $("ability-stats").innerHTML = values.map(item => `<div class="ability-stat ${item.value === topValue ? "top" : ""}"><div class="ability-head"><strong>${item.name}</strong><span>${item.value}点</span></div><div class="ability-meter"><span style="width:${item.value}%"></span></div><span class="ability-label">${level(item.value)}</span><p class="ability-reason">25問中${item.relatedAnswers}問で、この力につながる答えを選びました。</p></div>`).join("") + `<p class="ability-guide">あなた自身の6能力の平均を50点として比較しています。75点以上＝とても得意／60〜74点＝得意／40〜59点＝標準／25〜39点＝少し苦手／24点以下＝後回しにしやすい領域</p>`;
+}
+
+function renderAbilityRadar(values) {
+  const centerX = 180, centerY = 180, radius = 126;
+  const point = (index, value = 100) => {
+    const angle = -Math.PI / 2 + index * Math.PI / 3;
+    const distance = radius * value / 100;
+    return [centerX + Math.cos(angle) * distance, centerY + Math.sin(angle) * distance];
+  };
+  const polygon = amount => values.map((_, index) => point(index, amount).map(number => number.toFixed(1)).join(",")).join(" ");
+  const abilityPoints = values.map((item, index) => point(index, item.value));
+  const axes = values.map((_, index) => { const [x, y] = point(index); return `<line x1="${centerX}" y1="${centerY}" x2="${x}" y2="${y}"/>`; }).join("");
+  const dots = abilityPoints.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4"/>`).join("");
+  const labels = values.map((item, index) => {
+    const [x, y] = point(index, 119);
+    const anchor = x < 145 ? "end" : x > 215 ? "start" : "middle";
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}"><tspan x="${x}" dy="0">${item.name}</tspan><tspan x="${x}" dy="18" class="radar-score">${item.value}点</tspan></text>`;
+  }).join("");
+  $("ability-radar").innerHTML = `<div class="radar-result-heading"><span>あなたの能力バランス</span><strong>6能力</strong></div><svg class="radar-chart radar-chart-result" viewBox="0 0 360 360" role="img" aria-label="${values.map(item => `${item.name}${item.value}点`).join("、")}"><g class="radar-grid"><polygon points="${polygon(100)}"/><polygon points="${polygon(75)}"/><polygon points="${polygon(50)}"/><polygon points="${polygon(25)}"/>${axes}</g><polygon class="radar-area" points="${abilityPoints.map(([x, y]) => `${x},${y}`).join(" ")}"/><g class="radar-dots">${dots}</g><g class="radar-labels">${labels}</g></svg><p>外側に広がるほど、その力を使いやすい傾向があります。</p>`;
 }
 
 function shareText() {
