@@ -15,7 +15,7 @@ const ISSUE_COPY = {
   組織運営: "人と仕事の回し方を整えること",
 };
 
-const state = { idx: 0, answers: [], typeLog: [], extraQuestions: [], checkIndex: 0, checkChoices: [], issues: {}, name: "あなた", stage: "", audience: "" };
+const state = { idx: 0, answers: [], typeLog: [], extraQuestions: [], checkIndex: 0, checkChoices: [], issues: {}, name: "あなた", stage: "", audience: "", urgent: false };
 const $ = s => document.querySelector(s);
 function show(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); $('#' + id).classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
@@ -106,10 +106,9 @@ function issueSummary() {
   const copy = ISSUE_COPY[label] || label;
   let text = `今回の3つの確認では、「${copy}」が今の課題候補として出ました。`;
   text += data.status === '確認できた' ? '複数の回答に同じ傾向があったため、優先して見てよさそうです。' : '答えは一つだけなので、まずは参考として小さく確かめてください。';
-  // urgentPrimaryIssue（緊急の資金繰り・法務・人事問題が主課題）は、現在の課題確認3問では
-  // 収集していないため常にfalse扱い。この条件を実際に機能させるには専用の設問が必要
-  // （引き継ぎ文書の未完了事項に記載）。
-  const story = storyOfferEligible({ issues, stage: state.stage, audience: state.audience, urgentPrimaryIssue: false });
+  // urgentPrimaryIssue（緊急の資金繰り・法務・人事問題が主課題）は、プロフィール入力画面の
+  // 「今日中や今週中の対応が必要か」の回答（state.urgent）をそのまま使う（2026-08-18追加）。
+  const story = storyOfferEligible({ issues, stage: state.stage, audience: state.audience, urgentPrimaryIssue: state.urgent });
   return { title: `今、先に整えたいのは\n${copy}`, text, story, label, status: data.status };
 }
 
@@ -142,8 +141,13 @@ function renderResult() {
     $('#storyReason').textContent = `「${issue.label}」が複数の回答で出ていて、${state.audience}へ構想を伝えたい時期でもあります。だから、いきなり商品をすすめるのではなく、まず無料の見本で「物語にすると何が変わるか」を確認してください。`;
   } else {
     $('#storyOffer').hidden = true; $('#otherOffer').hidden = false;
-    $('#otherTitle').textContent = issue.label === '営業' ? 'まずは、お客さんの声を一つ集める' : issue.label === '組織運営' ? 'まずは、任せる仕事を一つ決める' : '診断の結果を、今週の行動へ';
-    $('#otherText').textContent = '今の回答では、まず足元の課題を小さく確かめる段階です。事業計画小説は、将来の構想を人へ伝える必要が生まれたときの選択肢として、下のページからいつでも読めます。';
+    if (state.urgent) {
+      $('#otherTitle').textContent = 'まずは、資金繰り・法律・人の緊急対応を';
+      $('#otherText').textContent = '今日中や今週中の対応が必要な資金繰り・法律・人の問題があると回答がありました。事業計画小説などの提案より前に、税理士・弁護士・社会保険労務士などの専門家や、社内外の関係者へすぐに相談してください。';
+    } else {
+      $('#otherTitle').textContent = issue.label === '営業' ? 'まずは、お客さんの声を一つ集める' : issue.label === '組織運営' ? 'まずは、任せる仕事を一つ決める' : '診断の結果を、今週の行動へ';
+      $('#otherText').textContent = '今の回答では、まず足元の課題を小さく確かめる段階です。事業計画小説は、将来の構想を人へ伝える必要が生まれたときの選択肢として、下のページからいつでも読めます。';
+    }
   }
   show('result');
 }
@@ -166,7 +170,7 @@ function share() {
 
 if (typeof document !== 'undefined') {
   $('#startBtn').onclick = () => show('profile');
-  $('#profileNext').onclick = () => { state.name = $('#name').value.trim() || 'あなた'; state.stage = $('#stage').value; state.audience = $('#audience').value; show('quiz'); renderQuestion(); };
+  $('#profileNext').onclick = () => { state.name = $('#name').value.trim() || 'あなた'; state.stage = $('#stage').value; state.audience = $('#audience').value; state.urgent = $('#urgent').value === 'yes'; show('quiz'); renderQuestion(); };
   $('#back').onclick = undo;
   $('#checkBack').onclick = checkBack;
   $('#retry').onclick = () => location.reload();
