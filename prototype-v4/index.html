@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7efe2">
+  <title>ねこ社長の経営の現在地診断</title>
+  <meta name="description" content="実際の経営場面を選ぶだけ。経営の傾向と、いま整えるとよいことが分かる無料診断です。">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header><a href="#top" class="brand"><span>ねこ社長の</span>経営の現在地診断</a><span>無料・約3分</span></header>
+  <main id="top">
+    <section id="landing" class="screen active">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">答えは、仕事の中にある。</p>
+          <h1>いまのあなたは、<br><em>どんな経営のしかた？</em></h1>
+          <p>12の短い場面で、いつもの選び方を教えてください。性格を決めつけず、今の会社で強く出ている傾向と、次に整える場所を猫たちと見つけます。</p>
+          <button class="primary" id="startBtn">無料で診断をはじめる <b>→</b></button>
+          <small>名前はニックネームで大丈夫。登録はありません。</small>
+        </div>
+        <div class="hero-art"><img src="../prototype-v3/assets/literary-cats-v2.jpg" alt="白猫と黒猫が喫茶店で相談しているイラスト"></div>
+      </div>
+      <section class="how">
+        <p class="eyebrow">この診断で分かること</p>
+        <div class="three"><article><b>01</b><h2>経営の中心傾向</h2><p>何を優先して決めやすいかを、ひとつに決めつけずに見ます。</p></article><article><b>02</b><h2>回答の見取り図</h2><p>「能力の点数」ではなく、今回の回答で強く出た選び方を図で表示します。</p></article><article><b>03</b><h2>今週の一手</h2><p>いまの困りごとを別に確認し、取り組める行動を一つ提案します。</p></article></div>
+      </section>
+      <section class="novel-intro"><div><p class="eyebrow">構想を、人に伝わる形へ</p><h2>事業計画小説とは？</h2><p>頭の中の事業構想を、社員や仲間が場面として想像できる物語へ変える方法です。診断を受けなくても、考え方と実例を読めます。</p></div><a class="outline" href="../prototype/story-plan.html">事業計画小説を知る →</a></section>
+    </section>
+
+    <section id="profile" class="screen form">
+      <div class="guide"><i class="cat white"></i><p>結果に表示する名前と、今の会社のことを少しだけ。</p></div>
+      <div class="card"><p class="eyebrow">はじめる前に</p><h1>今の会社を思い浮かべて</h1><label>お名前・ニックネーム<input id="name" maxlength="20" placeholder="例：ゆうじ"></label><label>今の会社・事業の段階<select id="stage"><option value="">選ばなくても大丈夫</option><option value="構想">これから始める・構想中</option><option value="検証">試しながら確かめている</option><option value="立上げ">始めたばかり</option><option value="成長">売上や人を増やしている</option><option value="安定">安定して回っている</option><option value="転換">次の柱や変化を考えている</option><option value="承継">引き継ぎを考えている</option></select></label><label>いま、構想を伝えたい相手<select id="audience"><option value="">まだ決まっていない・特にいない</option><option>社員</option><option>採用候補</option><option>共同経営者・仲間</option><option>出資者・金融機関</option><option>お客様</option></select></label><button id="profileNext" class="primary">質問へ進む <b>→</b></button></div>
+    </section>
+
+    <section id="quiz" class="screen quiz">
+      <div class="progress"><div><span id="count"></span><span id="chapter"></span></div><i><b id="bar"></b></i></div>
+      <button id="back" class="back">← 一つ戻る</button>
+      <div class="guide"><i class="cat white"></i><p id="talk">いつもの自分に近い方で大丈夫。</p></div>
+      <div class="card question"><p id="scene" class="scene"></p><h1 id="question"></h1><div id="answers" class="answers"></div></div>
+    </section>
+
+    <section id="check" class="screen form">
+      <div class="guide"><i class="cat black"></i><p>タイプとは別に、いま起きていることを3つだけ確認します。</p></div>
+      <div class="card question"><p id="checkStep" class="eyebrow"></p><h1 id="checkQuestion"></h1><div id="checkAnswers" class="answers"></div><button id="checkBack" class="back">← 一つ戻る</button></div>
+    </section>
+
+    <section id="result" class="screen result">
+      <div class="result-head"><i class="cat black large"></i><p><span id="resultName"></span>さんの、今回の回答から見た</p><h1 id="mainType"></h1><h2 id="tagline"></h2><p id="mix"></p></div>
+      <div class="result-body">
+        <section class="result-card"><p class="eyebrow">回答の見取り図</p><h2>どんな選び方が強く出た？</h2><canvas id="radar" width="620" height="470"></canvas><div id="axisList" class="axis-list"></div><p class="note">これは能力テストの点数ではありません。今回の回答で、どの選び方が強く出たかを表しています。</p></section>
+        <section class="result-card"><p class="eyebrow">この結果になった理由</p><h2>選んだ答えから、こう読み取りました</h2><p id="reasonIntro"></p><div id="evidence"></div></section>
+        <section class="result-card split"><div><p class="eyebrow">力が生きる場面</p><h2 id="strengthTitle"></h2><p id="strength"></p></div><div><p class="eyebrow">強く出すぎると</p><h2>気をつけたいこと</h2><p id="risk"></p></div></section>
+        <section class="result-card"><p class="eyebrow">いまの状態</p><h2 id="issueTitle">今、先に整えたいこと</h2><div id="issues"></div><p id="issueText"></p><div class="action"><b>今週の一歩</b><h3 id="actionTitle"></h3><p id="actionText"></p></div></section>
+        <section id="storyOffer" class="story-offer" hidden><p class="eyebrow">構想を伝える必要がある今だから</p><h2>事業計画小説が、選択肢になるかもしれません。</h2><p id="storyReason"></p><p>まずは、相手に何を分かってほしいかを一文にしてみてください。そのうえで、図解・計画書・対話に加え、構想を物語として共有する方法があります。</p><a class="primary" href="../prototype/story-plan.html">事業計画小説について詳しく見る <b>→</b></a><a href="../prototype/story-preview.html" class="text-link">無料公開の見本を読む</a></section>
+        <section id="otherOffer" class="result-card" hidden><p class="eyebrow">いまは、ここから</p><h2 id="otherTitle"></h2><p id="otherText"></p><a href="../prototype/story-plan.html" class="text-link">事業計画小説の考え方を見る</a></section>
+        <section class="share"><h2>結果を友だちに送る</h2><p>結果の概要を、LINEやXで共有できます。</p><div><button id="nativeShare">共有する</button><button id="lineShare">LINE</button><button id="xShare">X</button><button id="copyShare">リンクをコピー</button></div><small id="shareStatus"></small></section>
+        <button id="retry" class="retry">もう一度診断する</button>
+      </div>
+    </section>
+  </main>
+  <footer>この診断は、医療・心理検査ではありません。現在の経営判断を振り返るための試作版です。</footer>
+  <script src="app.js"></script>
+</body>
+</html>
+
