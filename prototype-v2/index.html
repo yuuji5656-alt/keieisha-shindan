@@ -87,18 +87,18 @@
         <div id="typeRanking" class="type-ranking"></div>
       </div>
 
+      <section class="story-offer story-offer-priority">
+        <div class="story-cat"><div class="cat-face cat-white large"></div></div>
+        <div><p class="eyebrow">診断で終わらせないための、次の提案</p><h2>今回のあなたには、<br>「事業計画小説」が役立つかもしれません。</h2><p id="storyReason"></p><p>頭の中にある事業構想を、社員・仲間・お客様にも場面が見える物語へ変える方法です。無料公開中の第1話で、まず実物を確かめられます。</p><div class="offer-actions"><a class="primary-btn link-btn" href="../prototype/story-preview.html">事業計画小説を無料で読む <span>→</span></a><a class="text-link" href="../prototype/story-plan.html">どんなサービスか詳しく見る</a></div></div>
+      </section>
+
       <div class="result-layout">
         <article class="result-card chart-card"><div class="card-title"><span>能力の見取り図</span><h2>得意・不得意</h2></div><canvas id="radar" width="520" height="420"></canvas><div id="abilityList" class="ability-list"></div><p class="chart-note">点数は回答から見た「今の傾向」です。人としての優劣ではありません。</p></article>
-        <article class="result-card"><div class="card-title"><span>今回の回答から</span><h2>こう判断しました</h2></div><div id="evidenceList" class="evidence-list"></div></article>
+        <article class="result-card"><div class="card-title"><span>診断結果の根拠</span><h2>このタイプになった理由</h2></div><p id="evidenceIntro" class="evidence-intro"></p><div id="evidenceList" class="evidence-list"></div></article>
         <article class="result-card advice-card"><div class="card-title"><span>あなたの取扱説明書</span><h2>傾向と対策</h2></div><div class="advice-grid"><section><h3>伸ばしたい強み</h3><p id="strengthText"></p></section><section><h3>気をつけたいこと</h3><p id="riskText"></p></section><section class="wide"><h3>うまく進むコツ</h3><p id="counterText"></p></section></div></article>
         <article class="result-card today-card"><span class="today-label">今日からの一歩</span><h2 id="todayTitle"></h2><p id="todayText"></p></article>
         <article class="result-card issue-result"><div class="card-title"><span>タイプとは別に</span><h2>いまの経営課題</h2></div><div id="selectedIssues"></div><p id="issueAdvice"></p></article>
       </div>
-
-      <section class="story-offer">
-        <div class="story-cat"><div class="cat-face cat-white large"></div></div>
-        <div><p class="eyebrow">もし、こんなことがあるなら</p><h2>頭の中では見えているのに、<br>人に話すとうまく伝わらない。</h2><p id="storyReason"></p><p>事業計画小説は、経営者の構想を社員・仲間・お客様にも見える物語へ変える方法です。まずは無料公開中の「第1章・第1話」で、どんなものか確かめてください。</p><div class="offer-actions"><a class="primary-btn link-btn" href="../prototype/story-preview.html">無料で第1話を読む <span>→</span></a><a class="text-link" href="../prototype/story-plan.html">考え方を詳しく見る</a></div></div>
-      </section>
 
       <section class="share-card"><h2>結果を友だちに送る</h2><p>結果だけが見られる専用ページを共有できます。</p><div class="share-buttons"><button id="nativeShare">共有する</button><button id="lineShare">LINE</button><button id="xShare">X</button><button id="copyShare">リンクをコピー</button></div><p id="shareStatus" aria-live="polite"></p></section>
       <button class="retry-btn" id="retryBtn">もう一度診断する</button>
@@ -108,3 +108,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
