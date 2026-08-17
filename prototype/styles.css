@@ -51,14 +51,14 @@ body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opa
 .hero-card::before { content: ""; position: absolute; width: 360px; height: 360px; right: -120px; top: -110px; border: 1px solid rgba(255,255,255,.24); border-radius: 50%; box-shadow: 0 0 0 50px rgba(255,255,255,.035), 0 0 0 100px rgba(255,255,255,.025); }
 .card-topline { display: flex; justify-content: space-between; font-size: 12px; letter-spacing: .12em; opacity: .7; }
 .radar-wrap { position: relative; }
-.sample-radar { max-width: 360px; margin: 25px auto 15px; }
+.sample-radar { max-width: 380px; margin: 25px auto 15px; }
 .radar-chart { display: block; width: 100%; overflow: visible; }
 .radar-grid polygon, .radar-grid line { fill: none; stroke: rgba(255,255,255,.2); stroke-width: 1; }
-.radar-area { fill: rgba(185,219,202,.48); stroke: var(--mint); stroke-width: 3; }
+.radar-area { fill: rgba(185,219,202,.56); stroke: #d8f5e6; stroke-width: 3; }
 .radar-dots circle { fill: #ffd28f; stroke: var(--forest); stroke-width: 2; }
 .radar-labels text { fill: white; font-size: 12px; font-weight: 800; text-anchor: middle; }
-.radar-center { position: absolute; left: 50%; top: 54.5%; transform: translate(-50%,-50%); width: 112px; height: 112px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--ink); background: rgba(255,253,248,.92); box-shadow: 0 8px 28px rgba(0,0,0,.16); }
-.radar-center small { font-size: 10px; opacity: .65; }.radar-center strong { margin-top: 5px; font-family: YuMincho, serif; font-size: 18px; }
+.radar-type-badge { margin: 10px auto 18px; padding: 13px 16px; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; color: var(--ink); background: var(--mint); border-left: 5px solid #ffd28f; box-shadow: 0 8px 24px rgba(0,0,0,.14); }
+.radar-type-badge small { grid-row: 1 / 3; padding-right: 12px; border-right: 1px solid rgba(23,35,29,.22); font-size: 10px; font-weight: 800; }.radar-type-badge strong { font-family: YuMincho, serif; font-size: 20px; }.radar-type-badge span { font-size: 11px; opacity: .72; }
 .hero-card > p { line-height: 1.8; color: rgba(255,255,255,.75); }
 
 .panel, .quiz { max-width: 840px; margin: 70px auto; padding: clamp(28px, 6vw, 70px); background: var(--white); box-shadow: var(--shadow); }
