@@ -115,6 +115,13 @@ input { width: 100%; border: 1px solid var(--line); border-radius: 3px; padding:
 .recommendation p { max-width: 800px; line-height: 1.9; }
 .recommendation .button { margin-top: 12px; background: var(--white); color: var(--ink); }
 .recommendation-link { display: inline-block; text-decoration: none; }
+.recommendation-diagnosis { padding: 18px 20px; border-left: 4px solid #ffd28f; background: rgba(255,255,255,.1); }
+.story-bridge { max-width: 800px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.3); }
+.story-bridge strong { font-family: YuMincho, serif; font-size: 24px; font-weight: 500; }
+.story-bridge p { margin-bottom: 0; }
+.recommendation-actions { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+.recommendation-sub-link { margin-top: 12px; color: white; font-weight: 800; text-underline-offset: 5px; }
+.recommendation-note { margin-top: 20px; font-size: 12px; opacity: .75; }
 .result-actions { display: flex; justify-content: center; gap: 24px; align-items: center; margin: 38px; }
 .share-link { padding: 14px 18px; border-radius: 4px; color: white; text-decoration: none; font-weight: 800; }.share-line { background: #06c755; }.share-x { background: #111; }
 .share-status { min-height: 1.5em; margin: -20px auto 30px; text-align: center; color: #68736d; font-size: 13px; }
@@ -128,6 +135,8 @@ footer { border-top: 1px solid var(--line); font-size: 12px; color: #6d7771; }
   .sample-orbit { width: 240px; height: 240px; margin-top: 42px; }
   .sample-core { width: 150px; height: 150px; }
   .hero-actions, .result-actions { align-items: stretch; flex-direction: column; }
+  .recommendation-actions { align-items: stretch; flex-direction: column; gap: 4px; }
+  .recommendation-actions .button { text-align: center; }
   .trust-list { flex-direction: column; gap: 10px; }
   .panel, .quiz { margin: 30px 14px; }
   .question-card { padding: 26px 20px; }
