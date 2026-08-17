@@ -318,12 +318,15 @@ function renderIssues() {
 
 function renderRecommendation() {
   const storyFit = state.computedIssues.some(issue => ["構想整理", "言語化"].includes(issue)) && ["構想", "検証", "立上げ", "転換"].includes(state.stage) && state.audience !== "特にいない";
-  if (storyFit) {
-    $("recommendation").innerHTML = `<p class="eyebrow">課題に合う次の一歩</p><h2>頭の中の構想を、${state.audience}が理解できる形にしてみませんか？</h2><p>まずは「誰に、何を理解して、どう動いてほしいか」を一文にしてください。図解や事業計画書に加え、関係者が将来像を追体験できる物語へ変える「事業計画小説」も選択肢の一つです。</p><a class="button recommendation-link" href="./story-plan.html">事業計画小説の考え方を見る</a>`;
-  } else {
-    const issue = state.computedIssues[0] || "現在の経営課題";
-    $("recommendation").innerHTML = `<p class="eyebrow">今日できる次の一歩</p><h2>まず「${issue}」を、事実一つで確認しましょう。</h2><p>この試作版では特定の商品を無理に提案しません。直近に起きた出来事を一つ選び、理想との差と次に試す小さな行動を書き出すところから始めてください。</p>`;
-  }
+  const issue = state.computedIssues[0] || "頭の中にある構想の共有";
+  const audience = state.audience && state.audience !== "特にいない" ? state.audience : "社員や協力者";
+  const heading = storyFit
+    ? `その事業構想を、${audience}が動ける物語にしませんか？`
+    : `あなたの考えは、${audience}に同じ景色として伝わっていますか？`;
+  const diagnosis = storyFit
+    ? `今回の回答では「${issue}」が現在の課題として表れています。構想そのものが弱いのではなく、頭の中の未来を他人が理解し、行動できる形へ変える部分に改善の余地があります。`
+    : `今回の中心課題は「${issue}」です。直接の解決策が事業計画小説とは限りません。ただ、経営者の考えを社員・採用候補・顧客と共有する必要があるなら、構想を物語にする方法が役立つ可能性があります。`;
+  $("recommendation").innerHTML = `<p class="eyebrow">診断から見えた次の一歩</p><h2>${heading}</h2><p class="recommendation-diagnosis">${diagnosis}</p><div class="story-bridge"><strong>事業計画小説とは</strong><p>経営者の頭の中にある事業構想を、登場人物の体験を通して第三者が理解できる物語へ変えるものです。事業計画書の代わりではなく、社員への共有、採用、顧客への世界観説明などを助けます。</p></div><div class="recommendation-actions"><a class="button recommendation-link" href="./story-preview.html">実物の第1章・第1話を無料で読む</a><a class="recommendation-sub-link" href="./story-plan.html">事業計画小説の仕組みを見る</a></div><p class="recommendation-note">売り込みではありません。まず実物を読み、自分の事業にも使えそうか確かめてください。</p>`;
 }
 
 function reset() {
