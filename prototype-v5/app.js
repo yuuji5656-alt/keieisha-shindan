@@ -127,23 +127,13 @@ function drawRadar(values) {
   context.lineWidth = 4;
   context.stroke();
 }
-function evidenceFor(topIds) {
-  const selected = [];
-  topIds.forEach((typeId, rankIndex) => {
-    const limit = rankIndex === 0 ? 2 : 1;
-    state.choices.filter(choice => choice.typeId === typeId).slice(0, limit).forEach(choice => {
-      selected.push({ ...choice, typeName: TYPES[typeId].name });
-    });
-  });
-  return selected.slice(0, 4);
-}
-
 function result() {
   const ranks = scoreTypes(state.log);
   const top = ranks.slice(0, 3);
   const [mainId, secondId, thirdId] = top.map(row => row[0]);
   const main = TYPES[mainId], second = TYPES[secondId];
   const mainDetail = TYPE_DETAILS[mainId], secondDetail = TYPE_DETAILS[secondId];
+  const historical = HISTORICAL_PEOPLE[mainId];
   const issues = scoreIssues(state.checks);
   const axes = normalizedAxes(state.log.slice(0, BASE.length));
   const eligible = storyOfferEligible({ planStatus: state.planStatus, audience: state.audience, urgentPrimaryIssue: state.urgentPrimaryIssue });
@@ -154,21 +144,24 @@ function result() {
   $("#mainType").textContent = main.name;
   $("#tagline").textContent = main.tag;
   $("#mix").textContent = "一つの型で決めつけず、上位3つの組み合わせで読み解きます。";
-  $("#topThree").innerHTML = top.map(([typeId, score], index) => `<span><small>${["中心", "次に強い", "補助"][index]}</small><b>${TYPES[typeId].name}</b><em>${score}回</em></span>`).join("");
+  $("#topThree").innerHTML = top.map(([typeId], index) => `<span><small>${["一番近い", "次に強い", "もう一つの強み"][index]}</small><b>${TYPES[typeId].name}</b></span>`).join("");
   $("#combinationTitle").textContent = `${main.name} × ${second.name}`;
-  $("#combinationText").textContent = `${mainDetail.summary} そこへ「${secondDetail.contribution}」が加わります。${main.risk} 一方で、2番目の傾向を意識して使うと、一つの癖だけに偏りにくくなります。`;
+  $("#combinationText").textContent = `「${mainDetail.contribution}」と「${secondDetail.contribution}」の両方が出ています。思いつきを、途中で終わらない仕事へ変えやすい組み合わせです。`;
   $("#axisList").innerHTML = AXES.map((axis, index) => `<span><b>${axis}</b><strong>${axes[index]}</strong><small>100点満点の回答傾向</small></span>`).join("");
   drawRadar(axes);
-  $("#reasonIntro").textContent = "型の説明を当てはめたのではなく、実際に選んだ答えのうち、上位3タイプにつながったものを抜き出しました。";
-  $("#evidence").innerHTML = evidenceFor([mainId, secondId, thirdId]).map(choice => `<article><p>${choice.scene}／${choice.typeName}</p><b>「${choice.answer}」を選んだ</b></article>`).join("");
+  $("#historicalName").textContent = historical.name;
+  $("#historicalType").textContent = main.name;
+  $("#historicalRole").textContent = historical.role;
+  $("#historicalReason").textContent = historical.reason;
   $("#strengthTitle").textContent = mainDetail.contribution;
   $("#strength").textContent = main.strength;
   $("#risk").textContent = main.risk;
   $("#fitList").innerHTML = mainDetail.fit.map(item => `<li>${item}</li>`).join("");
   $("#accidentList").innerHTML = mainDetail.accidents.map(item => `<li>${item}</li>`).join("");
-  const partnerNames = mainDetail.partners.map(typeId => TYPES[typeId].name).join("、");
-  $("#partnerTitle").textContent = `${partnerNames}の人`;
-  $("#partnerText").textContent = mainDetail.partnerReason;
+  $("#advisorCards").innerHTML = ADVISOR_TEAMS[mainId].map(advisor => {
+    const person = HISTORICAL_PEOPLE[advisor.typeId];
+    return `<article><h3>${person.name}</h3><b>${TYPES[advisor.typeId].name}</b><p>${person.role}</p><p>${advisor.why}</p></article>`;
+  }).join("");
 
   const entries = Object.entries(issues).sort((a, b) => b[1].score - a[1].score);
   const lead = entries[0];
@@ -235,4 +228,5 @@ $("#copyShare").onclick = async () => {
   await navigator.clipboard.writeText(share().text + "\n" + share().url);
   $("#shareStatus").textContent = "診断結果のリンクをコピーしました。";
 };
+
 
