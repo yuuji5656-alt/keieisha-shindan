@@ -30,12 +30,12 @@ function main() {
 
   console.log('\n=== 事業計画小説の主提案条件 ===');
   const cases = [
-    { name: '適合(条件すべて満たす)', input: { issues: { 言語化: { status: '確認できた' } }, stage: '検証', audience: '社員', urgentPrimaryIssue: false }, expect: true },
-    { name: '不適合(根拠が参考のみ)', input: { issues: { 言語化: { status: '参考' } }, stage: '検証', audience: '社員', urgentPrimaryIssue: false }, expect: false },
-    { name: '不適合(事業段階が対象外)', input: { issues: { 言語化: { status: '確認できた' } }, stage: '安定', audience: '社員', urgentPrimaryIssue: false }, expect: false },
-    { name: '不適合(共有相手なし)', input: { issues: { 言語化: { status: '確認できた' } }, stage: '検証', audience: '', urgentPrimaryIssue: false }, expect: false },
-    { name: '不適合(緊急の資金繰り等が主課題)', input: { issues: { 言語化: { status: '確認できた' } }, stage: '検証', audience: '社員', urgentPrimaryIssue: true }, expect: false },
-    { name: '適合(構想整理が根拠)', input: { issues: { 構想整理: { status: '確認できた' } }, stage: '転換', audience: '出資者・金融機関', urgentPrimaryIssue: false }, expect: true },
+    { name: '適合(計画書＋お客様)', input: { planStatus: 'plan', audience: 'お客様', urgentPrimaryIssue: false }, expect: true },
+    { name: '適合(構想メモ＋社員)', input: { planStatus: 'memo', audience: '社員', urgentPrimaryIssue: false }, expect: true },
+    { name: '不適合(制作材料なし)', input: { planStatus: 'none', audience: 'お客様', urgentPrimaryIssue: false }, expect: false },
+    { name: '不適合(届けたい相手なし)', input: { planStatus: 'plan', audience: '', urgentPrimaryIssue: false }, expect: false },
+    { name: '不適合(緊急の資金繰り等が主課題)', input: { planStatus: 'plan', audience: '社員', urgentPrimaryIssue: true }, expect: false },
+    { name: '適合(事業段階・タイプに依存しない)', input: { planStatus: 'plan', audience: '応援者', urgentPrimaryIssue: false }, expect: true },
   ];
   const rows = {};
   cases.forEach(c => {
@@ -51,3 +51,4 @@ function main() {
 }
 
 main();
+

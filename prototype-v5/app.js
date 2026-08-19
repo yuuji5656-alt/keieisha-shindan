@@ -1,14 +1,238 @@
 /* v5表示層。採点はすべて data.js の公開関数だけを利用する。 */
-const $ = s => document.querySelector(s);
-const state={index:0,log:[],checks:[],extra:[],name:'あなた',stage:'',audience:'',urgentPrimaryIssue:false};
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$('#'+id).classList.add('active');scrollTo({top:0,behavior:'smooth'});}
-function allQuestions(){return [...BASE,...state.extra];}
-function renderQuestion(){const q=allQuestions()[state.index];$('#count').textContent=`${state.index+1}問目 / ${allQuestions().length}問`;$('#chapter').textContent='いつもの決め方';$('#bar').style.width=`${(state.index+1)/allQuestions().length*100}%`;$('#scene').textContent=`場面：${q.scene}`;$('#question').textContent=q.q;$('#talk').textContent='正解ではなく、いつもの自分に近い方を選んでください。';$('#back').hidden=!state.index;$('#answers').innerHTML='';q.a.forEach((x,i)=>{const b=document.createElement('button');b.innerHTML=`<b>${'ABCD'[i]}</b>${x}`;b.onclick=()=>answer(q,i);$('#answers').append(b);});}
-function answer(q,i){state.log.push(q.type[i]);state.index++;if(state.index<allQuestions().length)return renderQuestion();if(state.extra.length<2&&isNearTie(scoreTypes(state.log))){const top=scoreTypes(state.log).slice(0,2).map(x=>x[0]);state.extra.push(buildExtraQuestion(top,state.extra.length));return renderQuestion();}startChecks();}
-function back(){if(!state.index)return;state.index--;state.log.pop();renderQuestion();}
-function startChecks(){state.checkIndex=0;show('check');renderCheck();}
-function renderCheck(){const q=CHECKS[state.checkIndex];$('#checkStep').textContent=`現在の確認 ${state.checkIndex+1} / ${CHECKS.length}`;$('#checkQuestion').textContent=q.q;$('#checkAnswers').innerHTML='';q.a.forEach((x,i)=>{const b=document.createElement('button');b.innerHTML=`<b>${'ABCD'[i]}</b>${x}`;b.onclick=()=>{state.checks[state.checkIndex]=i;if(++state.checkIndex<CHECKS.length)renderCheck();else result();};$('#checkAnswers').append(b);});}
-function checkBack(){if(!state.checkIndex){show('quiz');return renderQuestion();}state.checkIndex--;renderCheck();}
-function result(){const ranks=scoreTypes(state.log),id=ranks[0][0],t=TYPES[id],issues=scoreIssues(state.checks),axes=normalizedAxes(state.log.slice(0,BASE.length));const eligible=storyOfferEligible({issues,stage:state.stage,audience:state.audience,urgentPrimaryIssue:state.urgentPrimaryIssue});state.resultType=id;state.resultAxes=axes;$('#resultName').textContent=state.name;$('#mainType').textContent=t.name;$('#tagline').textContent=t.tag;$('#mix').textContent='今回の回答で中心に出た傾向です。能力の優劣ではありません。';$('#axisList').innerHTML=AXES.map((x,i)=>`<span><b>${x}</b><strong>${axes[i]}</strong><small>今回の回答傾向</small></span>`).join('');$('#reasonIntro').textContent='選んだ場面から、今の経営で大切にしやすいことを読み取りました。';$('#evidence').innerHTML=`<article><p>今回の中心傾向</p><b>${t.tag}</b></article>`;$('#strengthTitle').textContent=t.strength;$('#strength').textContent='今回の回答では、この場面で力が生きやすい傾向が出ています。';$('#risk').textContent=t.risk;const entries=Object.entries(issues);const lead=entries.sort((a,b)=>b[1].score-a[1].score)[0];$('#issues').innerHTML=entries.map(([k,v])=>`<span>${k}（${v.status}）</span>`).join('')||'<span>今は大きな詰まりなし</span>';$('#issueTitle').textContent=lead?`今、先に整えたいのは\n${lead[0]}`:'今、先に整えたいこと';$('#issueText').textContent=lead?`今回の確認では「${lead[0]}」が${lead[1].status}として出ました。タイプとは別に、今の状況として小さく確かめてください。`:'回答からは、優先する課題はまだはっきり確認できませんでした。';$('#actionTitle').textContent=t.action;$('#actionText').textContent=t.actionText;$('#storyOffer').hidden=!eligible;$('#otherOffer').hidden=eligible;if(eligible){$('#storyReason').textContent=`「構想を整理・言葉にすること」が複数の回答で確認でき、${state.audience}へ伝えたい時期でもあります。まず無料の見本で、構想を物語にすると何が変わるかを確かめてください。`;}else{$('#otherTitle').textContent=state.urgentPrimaryIssue?'まずは、緊急対応を優先してください':'まずは、今週の一歩から';$('#otherText').textContent=state.urgentPrimaryIssue?'資金繰り・法律・人の問題は、関係者や専門家への相談を優先してください。':'今の課題を小さく確かめてから、必要な解決策を選びましょう。';}show('result');}
-function share(){const url=new URL('share-result.html',location.href);url.searchParams.set('type',state.resultType);url.searchParams.set('name',state.name);url.searchParams.set('axes',state.resultAxes.join(','));return{text:`私は「${$('#mainType').textContent}」でした。${$('#tagline').textContent}\n経営の現在地診断`,url:url.href};}
-$('#startBtn').onclick=()=>show('profile');$('#profileNext').onclick=()=>{state.name=$('#name').value.trim()||'あなた';state.stage=$('#stage').value;state.audience=$('#audience').value;state.urgentPrimaryIssue=$('#urgent').value==='yes';show('quiz');renderQuestion();};$('#back').onclick=back;$('#checkBack').onclick=checkBack;$('#retry').onclick=()=>location.reload();$('#nativeShare').onclick=()=>navigator.share&&navigator.share(share());$('#lineShare').onclick=()=>open('https://line.me/R/msg/text/?'+encodeURIComponent(share().text+'\n'+share().url),'_blank');$('#xShare').onclick=()=>open('https://twitter.com/intent/tweet?text='+encodeURIComponent(share().text)+'&url='+encodeURIComponent(share().url),'_blank');$('#copyShare').onclick=async()=>{await navigator.clipboard.writeText(share().text+'\n'+share().url);$('#shareStatus').textContent='リンクをコピーしました。';};
+const $ = selector => document.querySelector(selector);
+const state = {
+  index: 0, log: [], choices: [], checks: [], extra: [],
+  name: "あなた", stage: "", planStatus: "none", audience: "",
+  urgentPrimaryIssue: false, resultRanks: [], resultAxes: []
+};
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(element => element.classList.remove("active"));
+  $("#" + id).classList.add("active");
+  scrollTo({ top: 0, behavior: "smooth" });
+}
+function allQuestions() { return [...BASE, ...state.extra]; }
+function renderQuestion() {
+  const questions = allQuestions();
+  const q = questions[state.index];
+  $("#count").textContent = `${state.index + 1}問目 / ${questions.length}問`;
+  $("#chapter").textContent = "いつもの決め方";
+  $("#bar").style.width = `${((state.index + 1) / questions.length) * 100}%`;
+  $("#scene").textContent = `場面：${q.scene}`;
+  $("#question").textContent = q.q;
+  $("#talk").textContent = "正解ではなく、いつもの自分に近いものを選んでください。";
+  $("#back").hidden = !state.index;
+  $("#answers").innerHTML = "";
+  q.a.forEach((answerText, answerIndex) => {
+    const button = document.createElement("button");
+    button.innerHTML = `<b>${"ABCD"[answerIndex]}</b>${answerText}`;
+    button.onclick = () => answer(q, answerIndex);
+    $("#answers").append(button);
+  });
+}
+function answer(q, answerIndex) {
+  const typeId = q.type[answerIndex];
+  state.log.push(typeId);
+  state.choices.push({ id: q.id || `extra-${state.extra.length}`, scene: q.scene, question: q.q, answer: q.a[answerIndex], typeId });
+  state.index += 1;
+  if (state.index < allQuestions().length) return renderQuestion();
+  if (state.extra.length < 2 && isNearTie(scoreTypes(state.log))) {
+    const top = scoreTypes(state.log).slice(0, 2).map(row => row[0]);
+    state.extra.push(buildExtraQuestion(top, state.extra.length));
+    return renderQuestion();
+  }
+  startChecks();
+}
+function back() {
+  if (!state.index) return;
+  state.index -= 1;
+  state.log.pop();
+  state.choices.pop();
+  if (state.index < BASE.length && state.extra.length) state.extra = [];
+  renderQuestion();
+}
+function startChecks() {
+  state.checkIndex = 0;
+  show("check");
+  renderCheck();
+}
+function renderCheck() {
+  const q = CHECKS[state.checkIndex];
+  $("#checkStep").textContent = `現在の確認 ${state.checkIndex + 1} / ${CHECKS.length}`;
+  $("#checkQuestion").textContent = q.q;
+  $("#checkAnswers").innerHTML = "";
+  q.a.forEach((answerText, answerIndex) => {
+    const button = document.createElement("button");
+    button.innerHTML = `<b>${"ABCD"[answerIndex]}</b>${answerText}`;
+    button.onclick = () => {
+      state.checks[state.checkIndex] = answerIndex;
+      if (++state.checkIndex < CHECKS.length) renderCheck();
+      else result();
+    };
+    $("#checkAnswers").append(button);
+  });
+}
+function checkBack() {
+  if (!state.checkIndex) {
+    state.index = allQuestions().length;
+    show("quiz");
+    return back();
+  }
+  state.checkIndex -= 1;
+  state.checks.splice(state.checkIndex, 1);
+  renderCheck();
+}
+
+function drawRadar(values) {
+  const canvas = $("#radar");
+  const context = canvas.getContext("2d");
+  const width = canvas.width, height = canvas.height;
+  const centerX = width / 2, centerY = height / 2 + 12, radius = 164, count = AXES.length;
+  context.clearRect(0, 0, width, height);
+  context.font = '600 15px "Yu Gothic", sans-serif';
+  context.textAlign = "center";
+  for (let level = 1; level <= 4; level += 1) {
+    context.beginPath();
+    AXES.forEach((_, index) => {
+      const angle = -Math.PI / 2 + index * Math.PI * 2 / count;
+      const r = radius * level / 4;
+      const x = centerX + Math.cos(angle) * r, y = centerY + Math.sin(angle) * r;
+      index ? context.lineTo(x, y) : context.moveTo(x, y);
+    });
+    context.closePath();
+    context.strokeStyle = "#d9d0c0";
+    context.stroke();
+  }
+  AXES.forEach((label, index) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / count;
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.lineTo(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius);
+    context.strokeStyle = "#e4ddd1";
+    context.stroke();
+    context.fillStyle = "#214837";
+    context.fillText(label, centerX + Math.cos(angle) * (radius + 38), centerY + Math.sin(angle) * (radius + 30) + 5);
+  });
+  context.beginPath();
+  values.forEach((value, index) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / count;
+    const r = radius * value / 100;
+    const x = centerX + Math.cos(angle) * r, y = centerY + Math.sin(angle) * r;
+    index ? context.lineTo(x, y) : context.moveTo(x, y);
+  });
+  context.closePath();
+  context.fillStyle = "rgba(211,118,77,.36)";
+  context.fill();
+  context.strokeStyle = "#cf714c";
+  context.lineWidth = 4;
+  context.stroke();
+}
+function evidenceFor(topIds) {
+  const selected = [];
+  topIds.forEach((typeId, rankIndex) => {
+    const limit = rankIndex === 0 ? 2 : 1;
+    state.choices.filter(choice => choice.typeId === typeId).slice(0, limit).forEach(choice => {
+      selected.push({ ...choice, typeName: TYPES[typeId].name });
+    });
+  });
+  return selected.slice(0, 4);
+}
+
+function result() {
+  const ranks = scoreTypes(state.log);
+  const top = ranks.slice(0, 3);
+  const [mainId, secondId, thirdId] = top.map(row => row[0]);
+  const main = TYPES[mainId], second = TYPES[secondId];
+  const mainDetail = TYPE_DETAILS[mainId], secondDetail = TYPE_DETAILS[secondId];
+  const issues = scoreIssues(state.checks);
+  const axes = normalizedAxes(state.log.slice(0, BASE.length));
+  const eligible = storyOfferEligible({ planStatus: state.planStatus, audience: state.audience, urgentPrimaryIssue: state.urgentPrimaryIssue });
+  state.resultRanks = top;
+  state.resultAxes = axes;
+
+  $("#resultName").textContent = state.name;
+  $("#mainType").textContent = main.name;
+  $("#tagline").textContent = main.tag;
+  $("#mix").textContent = "一つの型で決めつけず、上位3つの組み合わせで読み解きます。";
+  $("#topThree").innerHTML = top.map(([typeId, score], index) => `<span><small>${["中心", "次に強い", "補助"][index]}</small><b>${TYPES[typeId].name}</b><em>${score}回</em></span>`).join("");
+  $("#combinationTitle").textContent = `${main.name} × ${second.name}`;
+  $("#combinationText").textContent = `${mainDetail.summary} そこへ「${secondDetail.contribution}」が加わります。${main.risk} 一方で、2番目の傾向を意識して使うと、一つの癖だけに偏りにくくなります。`;
+  $("#axisList").innerHTML = AXES.map((axis, index) => `<span><b>${axis}</b><strong>${axes[index]}</strong><small>100点満点の回答傾向</small></span>`).join("");
+  drawRadar(axes);
+  $("#reasonIntro").textContent = "型の説明を当てはめたのではなく、実際に選んだ答えのうち、上位3タイプにつながったものを抜き出しました。";
+  $("#evidence").innerHTML = evidenceFor([mainId, secondId, thirdId]).map(choice => `<article><p>${choice.scene}／${choice.typeName}</p><b>「${choice.answer}」を選んだ</b></article>`).join("");
+  $("#strengthTitle").textContent = mainDetail.contribution;
+  $("#strength").textContent = main.strength;
+  $("#risk").textContent = main.risk;
+  $("#fitList").innerHTML = mainDetail.fit.map(item => `<li>${item}</li>`).join("");
+  $("#accidentList").innerHTML = mainDetail.accidents.map(item => `<li>${item}</li>`).join("");
+  const partnerNames = mainDetail.partners.map(typeId => TYPES[typeId].name).join("、");
+  $("#partnerTitle").textContent = `${partnerNames}の人`;
+  $("#partnerText").textContent = mainDetail.partnerReason;
+
+  const entries = Object.entries(issues).sort((a, b) => b[1].score - a[1].score);
+  const lead = entries[0];
+  $("#issues").innerHTML = entries.map(([key, value]) => `<span>${key}（${value.status}）</span>`).join("") || "<span>今は大きな詰まりなし</span>";
+  $("#issueTitle").textContent = lead ? `今、先に整えたいのは\n${lead[0]}` : "今、先に整えたいこと";
+  $("#issueText").textContent = lead ? `最後の3問では「${lead[0]}」が${lead[1].status}として出ました。これは経営タイプではなく、今の状態についての結果です。` : "最後の3問からは、優先する課題はまだはっきり確認できませんでした。";
+  $("#actionTitle").textContent = main.action;
+  $("#actionText").textContent = main.actionText;
+
+  $("#storyOffer").hidden = !eligible;
+  $("#otherOffer").hidden = eligible;
+  if (eligible) {
+    const material = state.planStatus === "plan" ? "事業計画書" : "構想のメモや資料";
+    const customerRoute = ["お客様", "応援者"].includes(state.audience);
+    $("#storyReason").textContent = customerRoute
+      ? `${material}があり、${state.audience}に事業を知ってほしい状態です。計画にある店・商品・人の成長を連載へ変え、物語から実際の接点へつなぐ材料があります。`
+      : `${material}があり、${state.audience}へ伝えたい相手も決まっています。計画の事実を土台に、その人が未来を場面として想像できる物語を設計できます。`;
+  } else if (state.urgentPrimaryIssue) {
+    $("#otherTitle").textContent = "まずは、緊急対応を優先してください";
+    $("#otherText").textContent = "資金繰り・法律・人の問題は、関係者や専門家への相談を先に。落ち着いてから、今週の一歩へ戻れば大丈夫です。";
+  } else if (state.planStatus === "none") {
+    $("#otherTitle").textContent = "まず、構想を一枚に書いてみる";
+    $("#otherText").textContent = "誰に、何を届け、どんな変化を起こしたいか。この3つを一枚に書くと、次に必要な方法を選びやすくなります。";
+  } else {
+    $("#otherTitle").textContent = "まず、届けたい相手を一人に決める";
+    $("#otherText").textContent = "社員、お客様、採用候補など、最初に分かってほしい相手を一人に絞ると、必要な説明や物語が見えてきます。";
+  }
+  show("result");
+}
+
+function share() {
+  const url = new URL("share-result.html", location.href);
+  url.searchParams.set("type", state.resultRanks[0][0]);
+  url.searchParams.set("second", state.resultRanks[1][0]);
+  url.searchParams.set("third", state.resultRanks[2][0]);
+  url.searchParams.set("name", state.name);
+  url.searchParams.set("axes", state.resultAxes.join(","));
+  return {
+    text: `私は「${$("#mainType").textContent}」でした。\n2番目は「${TYPES[state.resultRanks[1][0]].name}」。\n経営の現在地診断`,
+    url: url.href
+  };
+}
+
+$("#startBtn").onclick = () => show("profile");
+$("#profileNext").onclick = () => {
+  state.name = $("#name").value.trim() || "あなた";
+  state.stage = $("#stage").value;
+  state.planStatus = $("#planStatus").value;
+  state.audience = $("#audience").value;
+  state.urgentPrimaryIssue = $("#urgent").value === "yes";
+  show("quiz");
+  renderQuestion();
+};
+$("#back").onclick = back;
+$("#checkBack").onclick = checkBack;
+$("#retry").onclick = () => location.reload();
+$("#nativeShare").onclick = () => {
+  if (navigator.share) navigator.share(share());
+  else $("#shareStatus").textContent = "この端末では、LINE・X・リンクコピーをお使いください。";
+};
+$("#lineShare").onclick = () => open("https://line.me/R/msg/text/?" + encodeURIComponent(share().text + "\n" + share().url), "_blank");
+$("#xShare").onclick = () => open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(share().text) + "&url=" + encodeURIComponent(share().url), "_blank");
+$("#copyShare").onclick = async () => {
+  await navigator.clipboard.writeText(share().text + "\n" + share().url);
+  $("#shareStatus").textContent = "診断結果のリンクをコピーしました。";
+};
+

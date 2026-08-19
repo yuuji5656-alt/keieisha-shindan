@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f7efe2">
   <title>経営の現在地診断</title>
-  <meta name="description" content="社長の頭の中にある次の一手を、社員や仲間へ伝えるための無料診断です。">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="15〜20の経営場面から、判断の癖・強み・つまずきやすい場面・今週の一手が分かる無料診断です。">
+  <link rel="stylesheet" href="styles.css?v=20260819">
 </head>
 <body>
-  <header><a href="#top" class="brand"><span>まんたとうにと考える</span>経営の現在地診断</a><span>無料・約3分</span></header>
+  <header><a href="#top" class="brand"><span>まんたとうにと考える</span>経営の現在地診断</a><nav><a href="../prototype/story-plan.html">事業計画小説</a><span>無料・約3分</span></nav></header>
   <main id="top">
     <section id="landing" class="screen active">
       <div class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">答えは、仕事の中にある。</p>
-          <h1>社長の「次の一手」、<br><em>社員に伝わっていますか？</em></h1>
-          <p>15〜20の短い場面で、いつもの選び方を教えてください。経営の傾向と、今の会社で先に整えたいことを、まんたとうにと見つけます。</p>
+          <p class="eyebrow">答えは、いつもの仕事の中にある。</p>
+          <h1>経営の癖がわかると、<br><em>次の一手が見えてくる。</em></h1>
+          <p>15〜20の短い場面で、普段の決め方を選ぶだけ。1位だけで決めつけず、上位3つの傾向、力が生きる場面、つまずきやすい場面、今週の一手まで読み解きます。</p>
           <button class="primary" id="startBtn">無料で診断をはじめる <b>→</b></button>
           <small>名前はニックネームで大丈夫。登録はありません。</small>
         </div>
@@ -26,12 +26,12 @@
         <p class="eyebrow">この診断で分かること</p>
         <div class="three"><article><b>01</b><h2>経営の中心傾向</h2><p>何を優先して決めやすいかを、ひとつに決めつけずに見ます。</p></article><article><b>02</b><h2>回答の見取り図</h2><p>「能力の点数」ではなく、今回の回答で強く出た選び方を図で表示します。</p></article><article><b>03</b><h2>今週の一手</h2><p>いまの困りごとを別に確認し、取り組める行動を一つ提案します。</p></article></div>
       </section>
-      <section class="novel-intro"><div><p class="eyebrow">構想を、人に伝わる形へ</p><h2>事業計画小説とは？</h2><p>頭の中の事業構想を、社員や仲間が場面として想像できる物語へ変える方法です。診断を受けなくても、考え方と実例を読めます。</p></div><a class="outline" href="../prototype/story-plan.html">無料で作品の雰囲気を見る →</a></section>
+      <section class="novel-intro"><div><p class="eyebrow">もう一つの入口</p><h2>事業計画には、<br>まだ読まれていない物語がある。</h2><p>事業計画を連載物語へ変え、お客様が続きを待ち、店や商品へつながる接点を育てる「事業計画小説」。診断を受けなくても、実際の計画と物語の対応例を見られます。</p></div><div class="novel-links"><a class="outline" href="../prototype/story-plan.html">実例と仕組みを見る →</a><a href="../prototype/story-preview.html">無料公開の物語を読む</a></div></section>
     </section>
 
     <section id="profile" class="screen form">
       <div class="guide"><i class="cat white"></i><p>結果に表示する名前と、今の会社のことを少しだけ。</p></div>
-      <div class="card"><p class="eyebrow">はじめる前に</p><h1>今の会社を思い浮かべて</h1><label>お名前・ニックネーム<input id="name" maxlength="20" placeholder="例：ゆうじ"></label><label>今の会社・事業の段階<select id="stage"><option value="">選ばなくても大丈夫</option><option value="構想">これから始める・構想中</option><option value="検証">試しながら確かめている</option><option value="立上げ">始めたばかり</option><option value="成長">売上や人を増やしている</option><option value="安定">安定して回っている</option><option value="転換">次の柱や変化を考えている</option><option value="承継">引き継ぎを考えている</option></select></label><label>いま、構想を伝えたい相手<select id="audience"><option value="">まだ決まっていない・特にいない</option><option>社員</option><option>採用候補</option><option>共同経営者・仲間</option><option>出資者・金融機関</option><option>お客様</option></select></label><label>今、資金繰り・法律・人の問題で、今日中や今週中の対応が必要ですか？<select id="urgent"><option value="no">いいえ</option><option value="yes">はい</option></select></label><button id="profileNext" class="primary">質問へ進む <b>→</b></button></div>
+      <div class="card"><p class="eyebrow">はじめる前に</p><h1>今の会社を思い浮かべて</h1><label>お名前・ニックネーム<input id="name" maxlength="20" placeholder="例：ゆうじ"></label><label>今の会社・事業の段階<select id="stage"><option value="">選ばなくても大丈夫</option><option value="構想">これから始める・構想中</option><option value="検証">試しながら確かめている</option><option value="立上げ">始めたばかり</option><option value="成長">売上や人を増やしている</option><option value="安定">安定して回っている</option><option value="転換">次の柱や変化を考えている</option><option value="承継">引き継ぎを考えている</option></select></label><label>事業の計画や構想は、何かに書いてありますか？<select id="planStatus"><option value="none">まだ書いていない</option><option value="memo">メモや資料がある</option><option value="plan">事業計画書がある</option></select></label><label>その事業を、いちばん知ってほしい相手<select id="audience"><option value="">まだ決まっていない・特にいない</option><option value="お客様">お客様</option><option value="応援者">地域の人・応援者</option><option value="社員">社員</option><option value="採用候補">採用候補</option><option value="共同経営者・仲間">共同経営者・仲間</option><option value="出資者・金融機関">出資者・金融機関</option></select></label><label>今、資金繰り・法律・人の問題で、今日中や今週中の対応が必要ですか？<select id="urgent"><option value="no">いいえ</option><option value="yes">はい</option></select></label><button id="profileNext" class="primary">質問へ進む <b>→</b></button></div>
     </section>
 
     <section id="quiz" class="screen quiz">
@@ -47,21 +47,25 @@
     </section>
 
     <section id="result" class="screen result">
-      <div class="result-head"><i class="cat black large"></i><p><span id="resultName"></span>さんの、今回の回答から見た</p><h1 id="mainType"></h1><h2 id="tagline"></h2><p id="mix"></p></div>
+      <div class="result-head"><i class="cat black large"></i><p><span id="resultName"></span>さんの、今回の回答から見た</p><h1 id="mainType"></h1><h2 id="tagline"></h2><p id="mix"></p><div id="topThree" class="top-three"></div></div>
       <div class="result-body">
+        <section class="result-card combination"><p class="eyebrow">あなたらしさは、組み合わせに出る</p><h2 id="combinationTitle"></h2><p id="combinationText"></p></section>
         <section class="result-card"><p class="eyebrow">回答の見取り図</p><h2>どんな選び方が強く出た？</h2><canvas id="radar" width="620" height="470"></canvas><div id="axisList" class="axis-list"></div><p class="note">これは能力テストの点数ではありません。今回の回答で、どの選び方が強く出たかを表しています。</p></section>
         <section class="result-card"><p class="eyebrow">この結果になった理由</p><h2>選んだ答えから、こう読み取りました</h2><p id="reasonIntro"></p><div id="evidence"></div></section>
         <section class="result-card split"><div><p class="eyebrow">力が生きる場面</p><h2 id="strengthTitle"></h2><p id="strength"></p></div><div><p class="eyebrow">強く出すぎると</p><h2>気をつけたいこと</h2><p id="risk"></p></div></section>
+        <section class="result-card manual"><p class="eyebrow">あなたの取扱説明書</p><h2>うまくいく場所と、事故が起きる場所</h2><div class="manual-grid"><div><h3>力を出しやすい環境</h3><ul id="fitList"></ul></div><div><h3>起きやすい事故</h3><ul id="accidentList"></ul></div></div></section>
+        <section class="result-card partner"><p class="eyebrow">隣にいると助かる人</p><h2 id="partnerTitle"></h2><p id="partnerText"></p></section>
         <section class="result-card"><p class="eyebrow">いまの状態</p><h2 id="issueTitle">今、先に整えたいこと</h2><div id="issues"></div><p id="issueText"></p><div class="action"><b>今週の一歩</b><h3 id="actionTitle"></h3><p id="actionText"></p></div></section>
-        <section id="storyOffer" class="story-offer" hidden><p class="eyebrow">構想を伝える必要がある今だから</p><h2>事業計画小説が、選択肢になるかもしれません。</h2><p id="storyReason"></p><p>まずは、相手に何を分かってほしいかを一文にしてみてください。そのうえで、図解・計画書・対話に加え、構想を物語として共有する方法があります。</p><a class="primary" href="../prototype/story-plan.html">事業計画小説について詳しく見る <b>→</b></a><a href="../prototype/story-preview.html" class="text-link">無料公開の見本を読む</a></section>
-        <section id="otherOffer" class="result-card" hidden><p class="eyebrow">いまは、ここから</p><h2 id="otherTitle"></h2><p id="otherText"></p><a href="../prototype/story-plan.html" class="text-link">事業計画小説の考え方を見る</a></section>
+        <section id="storyOffer" class="story-offer" hidden><p class="eyebrow">今回の回答とは別に、事業の状況から</p><h2>その事業計画、連載物語にできるかもしれません。</h2><p id="storyReason"></p><p>計画を飾るためではありません。事実を土台に登場人物と出来事を設計し、続きを待つ読者と、店・商品・活動の接点を育てる方法です。</p><a class="primary" href="../prototype/story-plan.html">実例と仕組みを見る <b>→</b></a><a href="../prototype/story-preview.html" class="text-link">無料公開の物語を読む</a></section>
+        <section id="otherOffer" class="result-card" hidden><p class="eyebrow">いまは、ここから</p><h2 id="otherTitle"></h2><p id="otherText"></p></section>
         <section class="share"><h2>結果を友だちに送る</h2><p>結果の概要を、LINEやXで共有できます。</p><div><button id="nativeShare">共有する</button><button id="lineShare">LINE</button><button id="xShare">X</button><button id="copyShare">リンクをコピー</button></div><small id="shareStatus"></small></section>
         <button id="retry" class="retry">もう一度診断する</button>
       </div>
     </section>
   </main>
   <footer>この診断は、医療・心理検査ではありません。現在の経営判断を振り返るための試作版です。</footer>
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="data.js?v=20260819"></script>
+  <script src="app.js?v=20260819"></script>
 </body>
 </html>
+

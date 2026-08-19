@@ -230,6 +230,7 @@ footer { border-top: 1px solid var(--line); font-size: 12px; color: #6d7771; }
 
 @media (max-width: 760px) {
   .story-hero { min-height: auto; grid-template-columns: 1fr; gap: 50px; padding-top: 70px; }
+  .story-hero h1 { font-size: 36px; line-height: 1.28; letter-spacing: -.07em; }
   .story-book { height: 350px; }.book-page { width: 240px; height: 330px; }.book-page-front strong { font-size: 24px; }
   .story-intro-grid, .sample-grid, .fit-grid { grid-template-columns: 1fr; gap: 30px; }
   .comparison-grid { grid-template-columns: 1fr; }.comparison-plus { justify-self: center; }
@@ -291,4 +292,5 @@ footer { border-top: 1px solid var(--line); font-size: 12px; color: #6d7771; }
   .plan-points { grid-template-columns: 1fr; }
   .preview-cta > div { flex-direction: column; }
 }
+
 
