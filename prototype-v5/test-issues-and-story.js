@@ -34,6 +34,11 @@ function main() {
     { name: '不適合(届けたい相手なし)', input: { planStatus: 'plan', audience: '', urgentPrimaryIssue: false }, expect: false },
     { name: '不適合(緊急の資金繰り等が主課題)', input: { planStatus: 'plan', audience: '社員', urgentPrimaryIssue: true }, expect: false },
     { name: '適合(事業段階・タイプに依存しない)', input: { planStatus: 'plan', audience: '応援者', urgentPrimaryIssue: false }, expect: true },
+    { name: '適合(資料なし・診断で言語化を確認できた)', input: { planStatus: 'none', audience: '社員', urgentPrimaryIssue: false, issues: { 言語化: { status: '確認できた' } } }, expect: true },
+    { name: '適合(資料なし・診断で構想整理を確認できた)', input: { planStatus: 'none', audience: '採用候補', urgentPrimaryIssue: false, issues: { 構想整理: { status: '確認できた' } } }, expect: true },
+    { name: '不適合(資料なし・課題は参考どまり)', input: { planStatus: 'none', audience: '社員', urgentPrimaryIssue: false, issues: { 言語化: { status: '参考' } } }, expect: false },
+    { name: '不適合(資料なし・診断課題あっても届けたい相手なし)', input: { planStatus: 'none', audience: '', urgentPrimaryIssue: false, issues: { 言語化: { status: '確認できた' } } }, expect: false },
+    { name: '不適合(資料なし・診断課題あっても緊急課題が優先)', input: { planStatus: 'none', audience: '社員', urgentPrimaryIssue: true, issues: { 言語化: { status: '確認できた' } } }, expect: false },
   ];
   const rows = {};
   cases.forEach(c => {

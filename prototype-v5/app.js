@@ -148,7 +148,7 @@ function result() {
   const mainDetail = TYPE_DETAILS[mainId], secondDetail = TYPE_DETAILS[secondId];
   const issues = scoreIssues(state.checks);
   const axes = normalizedAxes(state.log);
-  const eligible = storyOfferEligible({ planStatus: state.planStatus, audience: state.audience, urgentPrimaryIssue: state.urgentPrimaryIssue });
+  const eligible = storyOfferEligible({ planStatus: state.planStatus, audience: state.audience, urgentPrimaryIssue: state.urgentPrimaryIssue, issues });
   const lowSignal = typeResult.lowSignal;
   const mixedTop = typeResult.mixedTop;
   const tieCount = typeResult.tieCount;
@@ -229,11 +229,21 @@ function result() {
   $("#storyOffer").hidden = !eligible;
   $("#otherOffer").hidden = eligible;
   if (eligible) {
+    const hasSourceMaterial = ["memo", "plan"].includes(state.planStatus);
     const material = state.planStatus === "plan" ? "事業計画書" : "構想のメモや資料";
     const customerRoute = ["お客様", "応援者"].includes(state.audience);
-    $("#storyReason").textContent = customerRoute
-      ? `${material}があり、${state.audience}に事業を知ってほしい状態です。計画にある店・商品・人の成長を連載へ変え、物語から実際の接点へつなぐ材料があります。`
-      : `${material}があり、${state.audience}へ伝えたい相手も決まっています。計画の事実を土台に、その人が未来を場面として想像できる物語を設計できます。`;
+    const confirmedIssueKeys = ["言語化", "構想整理"].filter(key => issues[key] && issues[key].status === "確認できた");
+    const issueClause = confirmedIssueKeys.length
+      ? `今回の回答では、異なる質問の根拠から「${confirmedIssueKeys.join("」「")}」の課題が確認できました。`
+      : "";
+    const readerClause = customerRoute
+      ? `${state.audience}に事業を知ってほしい状態です。`
+      : `${state.audience}へ伝えたい相手も決まっています。`;
+    const bodyClause = hasSourceMaterial
+      ? `${material}があり、${readerClause}計画にある店・商品・人の成長を連載へ変え、物語から実際の接点へつなぐ材料があります。`
+      : `${readerClause}資料がまだなくても、事業計画小説はその内容を整理しながら物語として形にする方法にもなります。`;
+    const stageHook = state.stage && STAGE_STORY_HOOK[state.stage] ? STAGE_STORY_HOOK[state.stage] : "";
+    $("#storyReason").textContent = `${issueClause}${bodyClause}${stageHook}`;
   } else if (state.urgentPrimaryIssue) {
     $("#otherTitle").textContent = "まずは、緊急対応を優先してください";
     $("#otherText").textContent = "資金繰り・法律・人の問題は、関係者や専門家への相談を先に。落ち着いてから、今週の一歩へ戻れば大丈夫です。";

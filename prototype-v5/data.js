@@ -587,12 +587,28 @@ function scoreIssues(checkChoices) {
   return result;
 }
 
+// 事業段階ごとに、事業計画小説がどう役立つかを一言添えるための言い換え。
+// 適格条件には使わない（段階だけで機会を狭めない）。stateにある値をそのまま表示に使う。
+const STAGE_STORY_HOOK = {
+  "構想": "まだ形になっていない構想も、物語にすることで輪郭がはっきりします。",
+  "検証": "検証中の今の試行錯誤も、物語にすれば伝わる形になります。",
+  "立上げ": "始まったばかりの今の空気は、あとからでは書けません。",
+  "成長": "広がっている今の勢いを、読者が続きを待つ形にできます。",
+  "安定": "積み重ねてきた歴史も、まだ知らない人には新しい物語です。",
+  "転換": "次の変化に向かう今を、物語として言葉にできます。",
+  "承継": "引き継がれていく想いを、次の世代や関係者に届く形にできます。",
+};
+
 // --- 事業計画小説の主提案条件 ---
-function storyOfferEligible({ planStatus, audience, urgentPrimaryIssue }) {
-  // 診断タイプや「売りたい課題」で誘導しない。制作の材料と、届けたい相手が実在するかで判定する。
+// 診断タイプでは誘導しない。制作の材料（計画書・構想メモ、または診断で確認できた
+// 言語化・構想整理の課題）と、届けたい相手が実在するかで判定する。
+function storyOfferEligible({ planStatus, audience, urgentPrimaryIssue, issues }) {
   const hasSourceMaterial = ["memo", "plan"].includes(planStatus);
+  const hasDiagnosedNeed = !!(issues && ["言語化", "構想整理"].some(
+    key => issues[key] && issues[key].status === "確認できた"
+  ));
   const hasReader = !!audience;
-  return hasSourceMaterial && hasReader && !urgentPrimaryIssue;
+  return (hasSourceMaterial || hasDiagnosedNeed) && hasReader && !urgentPrimaryIssue;
 }
 
 if (typeof module !== "undefined" && module.exports) {
@@ -602,7 +618,7 @@ if (typeof module !== "undefined" && module.exports) {
     buildExtraQuestion, buildFallbackExtra,
     scoreTypeMap, scoreTypes, classifyTypeResult, isNearTie,
     axisRaw, AXIS_THEORETICAL_MAX, AXIS_RANDOM_STD, normalizedAxes,
-    scoreIssues, storyOfferEligible,
+    scoreIssues, storyOfferEligible, STAGE_STORY_HOOK,
   };
 }
 

@@ -1,11 +1,11 @@
 ---
 name: keieisha-shindan
 description: 経営者の意思決定傾向を10タイプで診断し、現在の経営課題と事業段階を独立して分析し、補完人材や次の行動を提案する。経営者タイプ診断、経営スタイル分析、経営相談への診断結果の適用、相性のよいNo.2、役員・幹部チームの偏り分析、診断質問や採点の改善を依頼されたときに使う。
+allowed-tools: Read, Bash
 ---
 
-<!-- 正本は skill-vault/keieisha-shindan/（common/procedures.md + codex/SKILL.md）。
-     Claude Code版は .claude/skills/keieisha-shindan/ に書き出し済み。
-     内容を変更する場合は skill-vault 側を更新し、両方の書き出し先へ反映すること。 -->
+<!-- 正本は skill-vault/keieisha-shindan/（common/procedures.md + claude-code/SKILL.md）。
+     内容を変更する場合はそちらを更新し、この書き出し先へ反映すること。 -->
 
 # 経営者診断
 
@@ -27,6 +27,11 @@ description: 経営者の意思決定傾向を10タイプで診断し、現在�
 - 課題抽出やサービス提案では、プロジェクト直下の `funnel-design.md` を読む。
 - 名称作業では、プロジェクト直下の `naming.md` を読み、各タイプ5案と上位3案を人に提示する。
 - 採点時は `data/scoring.json` を正とし、`scripts/score_diagnostic.py` で結果と加点履歴を再現する。
+
+> 既知の欠落：`references/diagnostic-rules.md`・`test-cases.md`・`naming.md`・
+> `scripts/score_diagnostic.py` はこのSKILLから参照されているが、本リポジトリには
+> まだ存在しない。揃うまでは、固定基準の本文と `types.md`／`scoring.md`／`funnel-design.md`
+> の内容で判断する。
 
 ## モードを決める
 
@@ -85,4 +90,3 @@ python scripts/score_diagnostic.py ABCDで構成した25文字 --compact
 - 一件の違和感だけで配点を変えない。複数ログで偏りを確認する。
 - 売上や成約率を上げる目的でタイプ点・課題点を変更しない。
 - 変更前後の版、理由、影響する質問、テスト結果を残す。
-
