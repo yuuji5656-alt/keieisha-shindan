@@ -1,7 +1,7 @@
 /* v5表示層。採点はすべて data.js の公開関数だけを利用する。 */
 const $ = selector => document.querySelector(selector);
 const state = {
-  index: 0, log: [], choices: [], checks: [], extra: [],
+  index: 0, log: [], choices: [], checks: [], extra: [], questions: [],
   name: "あなた", stage: "", planStatus: "none", audience: "",
   urgentPrimaryIssue: false, resultRanks: [], resultAxes: []
 };
@@ -11,21 +11,21 @@ function show(id) {
   $("#" + id).classList.add("active");
   scrollTo({ top: 0, behavior: "smooth" });
 }
-function allQuestions() { return [...BASE, ...state.extra]; }
+function allQuestions() { return [...state.questions, ...state.extra]; }
 function renderQuestion() {
   const questions = allQuestions();
   const q = questions[state.index];
-  $("#count").textContent = `${state.index + 1}問目 / ${questions.length}問`;
-  $("#chapter").textContent = "いつもの決め方";
+  $("#count").textContent = `${state.index + 1}問目 / 全25問`;
+  $("#chapter").textContent = "ふだんの自分について";
   $("#bar").style.width = `${((state.index + 1) / questions.length) * 100}%`;
-  $("#scene").textContent = `場面：${q.scene}`;
+  $("#scene").textContent = state.index < state.questions.length ? "ふだんの自分について" : "もう少しだけ";
   $("#question").textContent = q.q;
-  $("#talk").textContent = "正解ではなく、いつもの自分に近いものを選んでください。";
+  $("#talk").textContent = "考えすぎず、いつもの自分で答えてね。";
   $("#back").hidden = !state.index;
   $("#answers").innerHTML = "";
   q.a.forEach((answerText, answerIndex) => {
     const button = document.createElement("button");
-    button.innerHTML = `<b>${"ABCD"[answerIndex]}</b>${answerText}`;
+    button.textContent = answerText;
     button.onclick = () => answer(q, answerIndex);
     $("#answers").append(button);
   });
@@ -36,11 +36,8 @@ function answer(q, answerIndex) {
   state.choices.push({ id: q.id || `extra-${state.extra.length}`, scene: q.scene, question: q.q, answer: q.a[answerIndex], typeId });
   state.index += 1;
   if (state.index < allQuestions().length) return renderQuestion();
-  if (state.extra.length < 2 && isNearTie(scoreTypes(state.log))) {
-    const top = scoreTypes(state.log).slice(0, 2).map(row => row[0]);
-    state.extra.push(buildExtraQuestion(top, state.extra.length));
-    return renderQuestion();
-  }
+  // 20問＋現在の確認5問で必ず25問にする。接戦用の追加質問は、
+  // 3択に統一した今回の版では出さない（質問数が増えて負担になるため）。
   startChecks();
 }
 function back() {
@@ -48,7 +45,7 @@ function back() {
   state.index -= 1;
   state.log.pop();
   state.choices.pop();
-  if (state.index < BASE.length && state.extra.length) state.extra = [];
+  if (state.index < state.questions.length && state.extra.length) state.extra = [];
   renderQuestion();
 }
 function startChecks() {
@@ -58,12 +55,12 @@ function startChecks() {
 }
 function renderCheck() {
   const q = CHECKS[state.checkIndex];
-  $("#checkStep").textContent = `現在の確認 ${state.checkIndex + 1} / ${CHECKS.length}`;
+  $("#checkStep").textContent = `今の困りごと ${state.checkIndex + 1} / ${CHECKS.length}`;
   $("#checkQuestion").textContent = q.q;
   $("#checkAnswers").innerHTML = "";
   q.a.forEach((answerText, answerIndex) => {
     const button = document.createElement("button");
-    button.innerHTML = `<b>${"ABCD"[answerIndex]}</b>${answerText}`;
+    button.textContent = answerText;
     button.onclick = () => {
       state.checks[state.checkIndex] = answerIndex;
       if (++state.checkIndex < CHECKS.length) renderCheck();
@@ -135,7 +132,7 @@ function result() {
   const mainDetail = TYPE_DETAILS[mainId], secondDetail = TYPE_DETAILS[secondId];
   const historical = HISTORICAL_PEOPLE[mainId];
   const issues = scoreIssues(state.checks);
-  const axes = normalizedAxes(state.log.slice(0, BASE.length));
+  const axes = normalizedAxes(state.log.slice(0, state.questions.length));
   const eligible = storyOfferEligible({ planStatus: state.planStatus, audience: state.audience, urgentPrimaryIssue: state.urgentPrimaryIssue });
   state.resultRanks = top;
   state.resultAxes = axes;
@@ -167,7 +164,7 @@ function result() {
   const lead = entries[0];
   $("#issues").innerHTML = entries.map(([key, value]) => `<span>${key}（${value.status}）</span>`).join("") || "<span>今は大きな詰まりなし</span>";
   $("#issueTitle").textContent = lead ? `今、先に整えたいのは\n${lead[0]}` : "今、先に整えたいこと";
-  $("#issueText").textContent = lead ? `最後の3問では「${lead[0]}」が${lead[1].status}として出ました。これは経営タイプではなく、今の状態についての結果です。` : "最後の3問からは、優先する課題はまだはっきり確認できませんでした。";
+  $("#issueText").textContent = lead ? `いまは「${lead[0]}」を先に整えると、あなたの強みが仕事で生きやすくなります。` : "今の回答では、大きく止まっていることは見つかりませんでした。";
   $("#actionTitle").textContent = main.action;
   $("#actionText").textContent = main.actionText;
 
@@ -207,11 +204,17 @@ function share() {
 
 $("#startBtn").onclick = () => show("profile");
 $("#profileNext").onclick = () => {
+  state.index = 0;
+  state.log = [];
+  state.choices = [];
+  state.checks = [];
+  state.extra = [];
   state.name = $("#name").value.trim() || "あなた";
   state.stage = $("#stage").value;
   state.planStatus = $("#planStatus").value;
   state.audience = $("#audience").value;
   state.urgentPrimaryIssue = $("#urgent").value === "yes";
+  state.questions = createQuestionSession();
   show("quiz");
   renderQuestion();
 };
