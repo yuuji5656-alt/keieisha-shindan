@@ -155,7 +155,7 @@ function result() {
   $("#risk").textContent = main.risk;
   $("#fitList").innerHTML = mainDetail.fit.map(item => `<li>${item}</li>`).join("");
   $("#accidentList").innerHTML = mainDetail.accidents.map(item => `<li>${item}</li>`).join("");
-  $("#advisorCards").innerHTML = ADVISOR_TEAMS[mainId].map(advisor => {
+  $("#advisorCards").innerHTML = advisorTeamFor(mainId).map(advisor => {
     const person = HISTORICAL_PEOPLE[advisor.typeId];
     return `<article><h3>${person.name}</h3><b>${TYPES[advisor.typeId].name}</b><p>${person.role}</p><p>${advisor.why}</p></article>`;
   }).join("");

@@ -174,6 +174,21 @@ const ADVISOR_TEAMS = {
   ]
 };
 
+// 固定3人ではなく、主タイプごとに6人の候補から毎回3人を選ぶ。
+// 全10タイプが候補として5〜7回ずつ登場する配分にして、特定の人物だけへ偏らないようにする。
+const ADVISOR_EXTRA_IDS = {
+  T01: ["T04", "T05", "T09"],
+  T02: ["T03", "T08", "T10"],
+  T03: ["T01", "T09", "T10"],
+  T04: ["T01", "T03", "T08"],
+  T05: ["T01", "T03", "T10"],
+  T06: ["T01", "T04", "T10"],
+  T07: ["T05", "T08", "T09"],
+  T08: ["T01", "T05", "T10"],
+  T09: ["T03", "T06", "T08"],
+  T10: ["T05", "T08", "T09"]
+};
+
 const AXES = ["新しいこと", "長く残すこと", "商品を磨くこと", "人を動かすこと", "市場を見ること", "数字を整えること", "自分の構想", "周りへの役立ち"];
 
 // タイプ→軸の対応（回答内容から8軸を独立集計するための固定表。タイプ得点の計算式とは別経路）。
@@ -255,6 +270,15 @@ function shuffle(items) {
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy;
+}
+
+function advisorTeamFor(mainId) {
+  const core = ADVISOR_TEAMS[mainId] || [];
+  const extra = (ADVISOR_EXTRA_IDS[mainId] || []).map(typeId => ({
+    typeId,
+    why: "あなたと違う得意を持つ人です。判断が一つに偏らないよう、別の見方を足してくれます。"
+  }));
+  return shuffle([...core, ...extra]).slice(0, 3);
 }
 
 function createQuestionSession() {
@@ -391,7 +415,7 @@ function storyOfferEligible({ planStatus, audience, urgentPrimaryIssue }) {
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
-    TYPES, TYPE_DETAILS, HISTORICAL_PEOPLE, ADVISOR_TEAMS, AXES, AXIS_MAP, BASE, QUESTION_BANK, CHECKS, EXTRA_PAIRS,
+    TYPES, TYPE_DETAILS, HISTORICAL_PEOPLE, ADVISOR_TEAMS, ADVISOR_EXTRA_IDS, advisorTeamFor, AXES, AXIS_MAP, BASE, QUESTION_BANK, CHECKS, EXTRA_PAIRS,
     createQuestionSession,
     buildExtraQuestion, buildFallbackExtra,
     scoreTypes, isNearTie,
