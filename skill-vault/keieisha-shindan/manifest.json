@@ -10,7 +10,7 @@
     "migrated_at": "2026-08-19"
   },
   "structure": {
-    "common": "common/procedures.md（共通手順）, common/data/scoring.json（採点データの正）",
+    "common": "common/procedures.md（共通手順）, common/references/diagnostic-rules.md（実行前ルール）, common/scripts/score_diagnostic.py（採点スクリプトの正）, common/data/scoring.json（採点データの正）",
     "codex": "codex/SKILL.md（frontmatterと発動条件のみ）",
     "claude-code": "claude-code/SKILL.md（frontmatterと発動条件のみ）",
     "tests": "tests/README.md（テスト資産の現状）",
@@ -20,19 +20,21 @@
     {
       "target": "codex",
       "path": "skills/keieisha-shindan/",
-      "status": "既存（Codexの実行コピー。今回の移植では変更していない）"
+      "status": "SKILL.md/data/scoring.jsonは既存のまま。scripts/score_diagnostic.pyとreferences/diagnostic-rules.mdはcommon/から新規に書き出した"
     },
     {
       "target": "claude-code",
       "path": ".claude/skills/keieisha-shindan/",
-      "status": "新規作成（common + claude-code/SKILL.md を書き出したもの）"
+      "status": "新規作成（common + claude-code/SKILL.md を書き出したもの。scripts/・references/含む）"
     }
   ],
   "sync_policy": "common/ の内容を変更したら、codex/SKILL.md・claude-code/SKILL.md の差分を確認したうえで、両方の書き出し先へ手動で反映する。書き出し先を直接編集した場合は、vault側へ書き戻してから両方を再書き出しする。",
+  "project_root_docs": {
+    "note": "types.md・questions.md・scoring.md・funnel-design.md・test-cases.md・naming.md はSkill配下ではなくプロジェクト直下に置く（SKILL.mdが「プロジェクト直下の」と明記しているため）。CodexとClaude Codeで同じ1ファイルを共有し、ツール別の書き出しはしない。",
+    "files": ["types.md", "questions.md", "scoring.md", "funnel-design.md", "test-cases.md", "naming.md"]
+  },
   "known_gaps": [
-    "references/diagnostic-rules.md が未作成（SKILL.mdから参照されているが実体なし）",
-    "test-cases.md が未作成",
-    "naming.md が未作成",
-    "scripts/score_diagnostic.py が未作成"
+    "naming.md は10タイプとも公開名称が未確定（意図的：オーナー未合意のまま確定名を作らない）",
+    "test-cases.md の課題判定（scoring.mdの課題配点）のテストケースが未作成"
   ]
 }

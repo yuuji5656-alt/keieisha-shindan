@@ -30,13 +30,32 @@ skill-vaultへの正式登録とClaude Code側への導入はClaude Codeが担�
   していない（発動条件・診断フローそのものはCodex版と同一手順のため、原本側で確認済みの
   内容を踏襲している）。
 
-## 既知の欠落（移植前から存在、今回のスコープ外）
+## 追記：参照先ファイルの新規作成（2026-08-19）
 
-`SKILL.md`（common/codex/claude-codeいずれも）が参照する以下のファイルは、
-本リポジトリに実体がない。`ClaudeCodeへの引き継ぎ_2026-08-18.md` の未完了事項4でも
-同じ指摘がある。今回の移植では作成していない。
+移植時点で存在しなかった参照先を、オーナーの依頼（「あるものは全部作っておきたい」）
+により作成した。
 
-- `references/diagnostic-rules.md`
-- `test-cases.md`
-- `naming.md`
-- `scripts/score_diagnostic.py`
+- `common/scripts/score_diagnostic.py`（新規）：`scoring.md`の配点・正規化・同点判定
+  ルールをそのまま実装。`skills/keieisha-shindan/data/scoring.json`を実データとして
+  読み込み、10タイプの一貫回答が想定タイプ第1位（正規化点100.00）になることと、
+  4つの混合回答ケースで想定2タイプが上位2位に入ることを実行して確認済み
+  （詳細と再現コマンドは `../../../test-cases.md`）。
+  `skills/keieisha-shindan/scripts/`・`.claude/skills/keieisha-shindan/scripts/` へ書き出し済み。
+- `common/references/diagnostic-rules.md`（新規）：SKILL.mdの必須原則、scoring.mdの
+  順位・確信度・同点判定ルール、課題の独立根拠ルールを実行時参照用に統合。新しい
+  判定基準の創作はしていない（既存文書の抜粋・整理のみ）。
+  `skills/keieisha-shindan/references/`・`.claude/skills/keieisha-shindan/references/` へ書き出し済み。
+- `test-cases.md`（プロジェクト直下・新規）：上記スクリプトで実際に計算した結果を記録。
+- `naming.md`（プロジェクト直下・新規）：名称候補は意図的に空欄のまま。SKILL.mdの
+  「未確定の公開名称を勝手に確定しない」原則により、Claude Codeが公開名称を創作する
+  ことはしていない。進め方の手順とタイプ対応表のみ用意した。
+
+`test-cases.md`・`naming.md`は`manifest.json`の`project_root_docs`が示すとおり
+プロジェクト直下の単一ファイルとして扱い、codex/claude-code別の書き出しはしていない
+（types.md等の既存プロジェクト直下ドキュメントと同じ扱い）。
+
+## 既知の欠落（今回のスコープ外として残るもの）
+
+- `naming.md`：10タイプとも公開名称が未確定（意図的）。
+- `test-cases.md`：課題判定（`scoring.md`「課題配点」）側のテストケースは未作成。
+  タイプ判定側のテストケースのみ作成済み。
