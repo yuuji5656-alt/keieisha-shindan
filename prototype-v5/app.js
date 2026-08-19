@@ -3,7 +3,7 @@ const $ = selector => document.querySelector(selector);
 const state = {
   index: 0, log: [], choices: [], checks: [], extra: [], questions: [], axisAnswers: [],
   name: "あなた", stage: "", planStatus: "none", audience: "",
-  urgentPrimaryIssue: false, resultRanks: [], resultAxes: []
+  urgentPrimaryIssue: false, resultRanks: [], resultAxes: [], mixedTop: false, tieCount: 1, lowSignal: false
 };
 
 function show(id) {
@@ -17,23 +17,36 @@ function renderQuestion() {
   const q = questions[state.index];
   $("#count").textContent = `${state.index + 1}問目 / 全25問`;
   $("#chapter").textContent = "ふだんの自分について";
-  $("#bar").style.width = `${((state.index + 1) / questions.length) * 100}%`;
-  $("#scene").textContent = state.index < state.questions.length ? "ふだんの自分について" : "もう少しだけ";
+  $("#bar").style.width = `${((state.index + 1) / 25) * 100}%`;
+  $("#scene").textContent = q.scene || "ふだんの自分について";
   $("#question").textContent = q.q;
   $("#talk").textContent = "考えすぎず、いつもの自分で答えてね。";
   $("#back").hidden = !state.index;
   $("#answers").innerHTML = "";
   q.a.forEach((answerText, answerIndex) => {
     const button = document.createElement("button");
-    button.textContent = answerText;
+    const hint = q.hints && q.hints[answerIndex];
+    if (hint) {
+      button.className = "with-hint";
+      const word = document.createElement("span");
+      word.className = "answer-word";
+      word.textContent = answerText;
+      const detail = document.createElement("span");
+      detail.className = "answer-hint";
+      detail.textContent = hint;
+      button.append(word, detail);
+    } else {
+      button.textContent = answerText;
+    }
     button.onclick = () => answer(q, answerIndex);
     $("#answers").append(button);
   });
 }
 function answer(q, answerIndex) {
   const typeId = q.type[answerIndex];
-  state.log.push(typeId);
-  if (state.index < state.questions.length) state.axisAnswers.push({ typeId: q.type[0], answerIndex });
+  const answerRecord = { yesType: q.type[0], noType: q.type[2], answerIndex };
+  state.log.push(answerRecord);
+  if (state.index < state.questions.length) state.axisAnswers.push(answerRecord);
   state.choices.push({ id: q.id || `extra-${state.extra.length}`, scene: q.scene, question: q.q, answer: q.a[answerIndex], typeId });
   state.index += 1;
   if (state.index < allQuestions().length) return renderQuestion();
@@ -127,37 +140,76 @@ function drawRadar(values) {
   context.stroke();
 }
 function result() {
-  const ranks = scoreTypes(state.log);
+  const typeResult = classifyTypeResult(state.log);
+  const ranks = typeResult.ranks;
   const top = ranks.slice(0, 3);
-  const [mainId, secondId, thirdId] = top.map(row => row[0]);
+  const [mainId, secondId] = top.map(row => row[0]);
   const main = TYPES[mainId], second = TYPES[secondId];
   const mainDetail = TYPE_DETAILS[mainId], secondDetail = TYPE_DETAILS[secondId];
-  const historical = HISTORICAL_PEOPLE[mainId];
   const issues = scoreIssues(state.checks);
-  const axes = normalizedAxes(state.axisAnswers);
+  const axes = normalizedAxes(state.log);
   const eligible = storyOfferEligible({ planStatus: state.planStatus, audience: state.audience, urgentPrimaryIssue: state.urgentPrimaryIssue });
+  const lowSignal = typeResult.lowSignal;
+  const mixedTop = typeResult.mixedTop;
+  const tieCount = typeResult.tieCount;
+  const tiedIds = mixedTop ? top.slice(0, tieCount).map(row => row[0]) : [mainId];
+  const tiedTypes = tiedIds.map(typeId => TYPES[typeId]);
+  const tiedDetails = tiedIds.map(typeId => TYPE_DETAILS[typeId]);
   state.resultRanks = top;
   state.resultAxes = axes;
+  state.mixedTop = mixedTop;
+  state.tieCount = tieCount;
+  state.lowSignal = lowSignal;
 
   $("#resultName").textContent = state.name;
-  $("#mainType").textContent = main.name;
-  $("#tagline").textContent = main.tag;
-  $("#mix").textContent = "一つの型で決めつけず、上位3つの組み合わせで読み解きます。";
-  $("#topThree").innerHTML = top.map(([typeId], index) => `<span><small>${["一番近い", "次に強い", "もう一つの強み"][index]}</small><b>${TYPES[typeId].name}</b></span>`).join("");
-  $("#combinationTitle").textContent = `${main.name} × ${second.name}`;
-  $("#combinationText").textContent = `「${mainDetail.contribution}」と「${secondDetail.contribution}」の両方が出ています。思いつきを、途中で終わらない仕事へ変えやすい組み合わせです。`;
-  $("#axisList").innerHTML = AXES.map((axis, index) => `<span><b>${axis}</b><strong>${axes[index]}点</strong><small>今回の回答から見た傾向</small></span>`).join("");
+  $("#mainType").textContent = lowSignal ? "まだ一つに絞れません" : tieCount === 3 ? "3つのタイプが同じくらい" : mixedTop ? `${main.name} × ${second.name}` : main.name;
+  $("#tagline").textContent = lowSignal ? "今回の回答では、タイプの差が十分に出ませんでした。" : tieCount === 3 ? tiedTypes.map(type => type.name).join("・") : mixedTop ? "二つの考え方を、同じくらい使っています。" : main.tag;
+  $("#mix").textContent = lowSignal ? "無理に型を当てはめず、今回は回答の見取り図だけをお返しします。" : mixedTop ? `同点の${tieCount === 3 ? "三つ" : "二つ"}を中心に、上位3つの組み合わせで読み解きます。` : "一つの型で決めつけず、上位3つの組み合わせで読み解きます。";
+  $("#topThree").style.display = lowSignal ? "none" : "";
+  document.querySelectorAll(".type-specific").forEach(card => { card.hidden = lowSignal; });
+  const sameRank = (a, b) => a[1] === b[1];
+  const rankLabels = [
+    sameRank(top[0], top[1]) ? "同じくらい強い" : "一番近い",
+    sameRank(top[0], top[1]) || sameRank(top[1], top[2]) ? "同じくらい強い" : "次に強い",
+    sameRank(top[1], top[2]) ? "同じくらい強い" : "もう一つの強み"
+  ];
+  $("#topThree").innerHTML = top.map(([typeId], index) => `<span><small>${rankLabels[index]}</small><b>${TYPES[typeId].name}</b></span>`).join("");
+  $("#combinationTitle").textContent = mixedTop ? tiedTypes.map(type => type.name).join(" × ") : `${main.name} × ${second.name}`;
+  $("#combinationText").textContent = mixedTop
+    ? `${tiedDetails.map(detail => `「${detail.contribution}」`).join("と")}が、同じくらい出た組み合わせです。`
+    : `中心にあるのは「${mainDetail.contribution}」。そこへ「${secondDetail.contribution}」が加わった組み合わせです。`;
+  const axisOrder = axes.map((value, index) => ({ value, index })).sort((a, b) => b.value - a.value);
+  const axisRange = axisOrder[0].value - axisOrder[axisOrder.length - 1].value;
+  $("#axisSummary").textContent = axisRange < 8
+    ? "今回は、八つの選び方に大きな差が出ませんでした。"
+    : `今回もっとも強く出たのは「${AXES[axisOrder[0].index]}」。一方、「${AXES[axisOrder[axisOrder.length - 1].index]}」は慎重に使う傾向です。`;
+  const band = value => value >= 70 ? "強く出た" : value >= 56 ? "やや強い" : value >= 45 ? "中間" : value >= 30 ? "やや控えめ" : "控えめ";
+  $("#axisList").innerHTML = AXES.map((axis, index) => `<span><b>${axis}</b><strong>${axes[index]}点</strong><small>${band(axes[index])}</small></span>`).join("");
   drawRadar(axes);
-  $("#historicalName").textContent = historical.name;
-  $("#historicalType").textContent = main.name;
-  $("#historicalRole").textContent = historical.role;
-  $("#historicalReason").textContent = historical.reason;
-  $("#strengthTitle").textContent = mainDetail.contribution;
-  $("#strength").textContent = main.strength;
-  $("#risk").textContent = main.risk;
-  $("#fitList").innerHTML = mainDetail.fit.map(item => `<li>${item}</li>`).join("");
-  $("#accidentList").innerHTML = mainDetail.accidents.map(item => `<li>${item}</li>`).join("");
-  $("#advisorCards").innerHTML = advisorTeamFor(mainId).map(advisor => {
+  const historicalIds = tiedIds;
+  $("#historicalCards").innerHTML = historicalIds.map(typeId => {
+    const person = HISTORICAL_PEOPLE[typeId];
+    return `<div class="historical-card"><h2>${person.name}</h2><b>${TYPES[typeId].name}</b><p>${person.role}</p><p>${person.reason}</p></div>`;
+  }).join("");
+  $("#strengthTitle").textContent = mixedTop ? tiedDetails.map(detail => detail.contribution).join("／") : mainDetail.contribution;
+  $("#strength").textContent = mixedTop ? tiedTypes.map(type => type.strength).join(" また、") : main.strength;
+  $("#risk").textContent = mixedTop ? tiedTypes.map(type => type.risk).join(" また、") : main.risk;
+  const itemsPerType = tieCount === 3 ? 1 : 2;
+  const fitItems = mixedTop ? tiedDetails.flatMap(detail => detail.fit.slice(0, itemsPerType)) : mainDetail.fit;
+  const accidentItems = mixedTop ? tiedDetails.flatMap(detail => detail.accidents.slice(0, itemsPerType)) : mainDetail.accidents;
+  $("#fitList").innerHTML = [...new Set(fitItems)].slice(0, 4).map(item => `<li>${item}</li>`).join("");
+  $("#accidentList").innerHTML = [...new Set(accidentItems)].slice(0, 4).map(item => `<li>${item}</li>`).join("");
+  const advisorSource = mixedTop ? tiedIds.flatMap(typeId => advisorTeamFor(typeId)) : advisorTeamFor(mainId);
+  const advisorCandidates = advisorSource.filter((advisor, index, list) =>
+    !historicalIds.includes(advisor.typeId) && list.findIndex(item => item.typeId === advisor.typeId) === index
+  );
+  Object.keys(TYPES).forEach(typeId => {
+    if (!historicalIds.includes(typeId) && !advisorCandidates.some(item => item.typeId === typeId)) {
+      advisorCandidates.push({ typeId, why: "あなたとは違う見方を足し、判断が一つに偏るのを防いでくれます。" });
+    }
+  });
+  const advisorTeam = advisorCandidates.slice(0, 3);
+  $("#advisorCards").innerHTML = advisorTeam.map(advisor => {
     const person = HISTORICAL_PEOPLE[advisor.typeId];
     return `<article><h3>${person.name}</h3><b>${TYPES[advisor.typeId].name}</b><p>${person.role}</p><p>${advisor.why}</p></article>`;
   }).join("");
@@ -167,8 +219,12 @@ function result() {
   $("#issues").innerHTML = entries.map(([key, value]) => `<span>${key}（${value.status}）</span>`).join("") || "<span>今は大きな詰まりなし</span>";
   $("#issueTitle").textContent = lead ? `今、先に整えたいのは\n${lead[0]}` : "今、先に整えたいこと";
   $("#issueText").textContent = lead ? `いまは「${lead[0]}」を先に整えると、あなたの強みが仕事で生きやすくなります。` : "今の回答では、大きく止まっていることは見つかりませんでした。";
-  $("#actionTitle").textContent = main.action;
-  $("#actionText").textContent = main.actionText;
+  $("#actionTitle").textContent = lowSignal ? "迷った質問を一つだけ思い返す" : mixedTop ? `${tieCount === 3 ? "三つ" : "二つ"}の得意を使う場面を分ける` : main.action;
+  $("#actionText").textContent = lowSignal
+    ? "答えに迷った場面から、今の会社で本当に優先したいことを一つ選んでみてください。"
+    : mixedTop
+      ? `今週の判断を一つ選び、${tiedTypes.map(type => `「${type.name}として考える部分」`).join("、")}を一行ずつ書いてください。`
+      : main.actionText;
 
   $("#storyOffer").hidden = !eligible;
   $("#otherOffer").hidden = eligible;
@@ -188,6 +244,7 @@ function result() {
     $("#otherTitle").textContent = "まず、届けたい相手を一人に決める";
     $("#otherText").textContent = "社員、お客様、採用候補など、最初に分かってほしい相手を一人に絞ると、必要な説明や物語が見えてきます。";
   }
+  $("#shareBlock").hidden = lowSignal;
   show("result");
 }
 
@@ -196,10 +253,16 @@ function share() {
   url.searchParams.set("type", state.resultRanks[0][0]);
   url.searchParams.set("second", state.resultRanks[1][0]);
   url.searchParams.set("third", state.resultRanks[2][0]);
+  if (state.mixedTop) {
+    url.searchParams.set("mixed", "1");
+    url.searchParams.set("ties", String(state.tieCount));
+  }
   url.searchParams.set("name", state.name);
   url.searchParams.set("axes", state.resultAxes.join(","));
   return {
-    text: `私は「${$("#mainType").textContent}」でした。\n2番目は「${TYPES[state.resultRanks[1][0]].name}」。\n経営の現在地診断`,
+    text: state.mixedTop
+      ? `私は「${state.tieCount === 3 ? "3つのタイプが同じくらい" : `${TYPES[state.resultRanks[0][0]].name} × ${TYPES[state.resultRanks[1][0]].name}`}」でした。\n経営の現在地診断`
+      : `私は「${$("#mainType").textContent}」でした。\n2番目は「${TYPES[state.resultRanks[1][0]].name}」。\n経営の現在地診断`,
     url: url.href
   };
 }

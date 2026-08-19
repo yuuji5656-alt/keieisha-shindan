@@ -1,14 +1,11 @@
-// prototype-v5 採点データ・ロジック（UIなし。採点テスト合格後にprototype-v4のUIへ組み込む）
+// prototype-v5 採点データ・ロジック
 //
-// v4からの設計変更点（オーナー指示 2026-08-18 追記分）：
-//   - 基本質問を12問→15問に変更。15問×4択＝60選択肢を10タイプへ「各6回ずつ」均等に割り当てる
-//     （割り当て表は scratchpad/gen-design.js で組合せ探索して生成し、全タイプ6回ずつ・
-//     ペア共起回数の偏りが最小になる結果を採用した）。
-//   - 1つの選択肢は主タイプ1つだけに同じ点数(+1)を加える。副次タイプへの曖昧な加点は廃止。
-//   - 正規化前の理論上の最大獲得点は、10タイプとも 6×1=6 で完全に同一（設計により自明に成立）。
-//   - 8軸の「今回の回答傾向」は、タイプ得点から作らず、回答した選択肢の内容から別計算する
-//     （AXIS_MAPによる独立集計。scoreTypes()の結果を一切参照しない）。
-//   - 接戦時だけ、タイプ名・説明文を見せない具体的な経営場面の追加質問を最大2問出す。
+// 2026-08-19版：
+//   - 回答は「はい・どちらでもない・いいえ」の3択に統一する。
+//   - 20組の比較から毎回1展開ずつ出し、10タイプを必ず各4回比較する。
+//   - 各タイプを「はい」側2回・「いいえ」側2回に置き、回答癖による偏りを相殺する。
+//   - 選んだ側を+2、反対側を-2、中立を0として相対的な優先傾向を出す。
+//   - タイプと「いまの困りごと」は混ぜず、最後の5問で別に確認する。
 const TYPES = {
   T01: { name: "始める人タイプ", tag: "まだない仕事を、最初の形にする。", strength: "新しいお客さんの困りごとや、まだ形になっていない機会を見つける場面です。", risk: "案が増えるほど、人とお金が分かれ、途中の仕事が残りやすくなります。", action: "今期に試す案を一つに絞る", actionText: "候補ごとに「誰のため・いつまでに試すか・やめる条件」を3行で書いてください。" },
   T02: { name: "整える人タイプ", tag: "自分がいなくても、続く形に整える。", strength: "人の頑張りだけに頼らず、同じ成果が続くように手順や数字を整える場面です。", risk: "整えることを急ぐと、現場の声や新しい試みを小さくしてしまうことがあります。", action: "止まりやすい仕事を一つ選ぶ", actionText: "自分がいないと止まる仕事を一つだけ挙げ、判断の基準と担当を紙に書きます。" },
@@ -191,9 +188,8 @@ const ADVISOR_EXTRA_IDS = {
 
 const AXES = ["新しいこと", "長く残すこと", "商品を磨くこと", "人を動かすこと", "市場を見ること", "数字を整えること", "自分の構想", "周りへの役立ち"];
 
-// 回答→8軸の対応。旧版は1軸につき質問が2問しかなく、0/50/100に偏っていた。
-// 今回は全20問を複数の軸へ反映する。回答は「はい=2、どちらでもない=1、いいえ=0」。
-// 例えば「新しいこと」は、始める力だけでなく市場を見る・構想を描く回答も少し反映する。
+// 10タイプ→8つの見取り図への対応。旧版は1軸につき質問が少なく、0/50/100へ偏っていた。
+// 今回は20問すべての相対得点を複数の軸へ反映し、50を中間、5〜95を表示範囲とする。
 const AXIS_MAP = {
   T01: [[0, 3], [4, 1], [6, 1]],
   T02: [[1, 3], [5, 1], [3, 1]],
@@ -207,10 +203,8 @@ const AXIS_MAP = {
   T10: [[1, 3], [7, 2], [2, 1]],
 };
 
-// v5.1: 旧15問4択は、言葉が難しく答える負担が大きかったため廃止。
-// 10タイプ×10問=100問の「短い、はい・どちらでもない・いいえ」プールを用意する。
-// 1回の診断では各タイプからランダムに2問ずつ、合計20問を出す。
-// したがって、毎回の出題は変わっても、タイプごとの最大点は常に2点で公平である。
+// v5.1で使っていたタイプ別の肯定文。回答癖の影響を受けるため公開画面では使わない。
+// 現行版は、下の20組の比較と questions.js の100場面を使う。
 const LEGACY_BASE = [
   { id: "q1", scene: "取引先から値上げの相談を受けたとき", q: "主要な仕入れ先から値上げを打診されました。最初にすることは？", a: ["他の仕入れ先の条件も調べ、有利な方を選ぶ", "値上げよりも、目指す商品作りに合う相手かを考える", "値上げを受けた先で、困る人が出ないかを考える", "長い関係を保てるよう、無理のない受け方を探す"], type: ["T04", "T05", "T08", "T10"] },
   { id: "q2", scene: "今の仕事とは別の事業アイデアを思いついたとき", q: "そのアイデアを試すとしたら、最初にすることは？", a: ["小さく試作し、需要があるか確かめる", "一緒に進める仲間をまず探す", "アイデアの完成度を、納得いくまで練り直す", "思いついた経緯を発信し、共感者を集める"], type: ["T01", "T03", "T07", "T09"] },
@@ -229,7 +223,7 @@ const LEGACY_BASE = [
   { id: "q15", scene: "ふとしたきっかけで、会社の10年後を考えたとき", q: "最も近いのは？", a: ["まだ無い事業を、いくつも生み出していたい", "資本を活かし、会社の価値を大きくしていたい", "自分の言葉に共感する人が増えていてほしい", "今の関係や信用が、次の世代へ続いていてほしい"], type: ["T01", "T06", "T09", "T10"] },
 ];
 
-const QUESTION_BANK = {
+const LEGACY_QUESTION_BANK = {
   T01: [
     "新しい商売の話を聞くと、まず試してみたくなる。", "今のやり方にない新しい仕事を考えるのが好きだ。", "思いついたら、小さくてもすぐ形にしたい。", "まだ誰もやっていないことにワクワクする。", "失敗しても、新しいことを試した方が前に進めると思う。", "今の仕事が順調でも、次の種を探している。", "新しいお客さんの困りごとを見つけると放っておけない。", "完成していなくても、反応を見るために出してみたい。", "人と違う道を選ぶことに抵抗が少ない。", "会社に新しい柱をつくりたいと思うことが多い。"
   ],
@@ -262,6 +256,119 @@ const QUESTION_BANK = {
   ]
 };
 
+// v5.2以前の比較文。言い換えが多く場面差が弱かったため、公開画面では使わない。
+// 現行100問は questions.js の CURRENT_PAIR_BANK。
+const LEGACY_PAIR_BANK = [
+  { types: ["T01", "T04"], items: [
+    ["新しい商品を試す", "今ある商品の売り方を磨く"], ["未知のお客さんを探す", "今のお客さんの反応を深く見る"],
+    ["新しい案を形にする", "売れる見せ方を確かめる"], ["新しい市場へ出る", "今の市場で勝ち筋を探す"],
+    ["次の事業を探す", "今の事業をもっと売れるようにする"]
+  ]},
+  { types: ["T04", "T07"], items: [
+    ["早く売って反応を見る", "納得できる品質まで磨く"], ["見せ方を先に変える", "商品の中身を先に直す"],
+    ["売れる形を優先する", "良い仕上がりを優先する"], ["まずお客さんへ出す", "まず細部を確かめる"],
+    ["反応の良いものを伸ばす", "自信のあるものを育てる"]
+  ]},
+  { types: ["T07", "T02"], items: [
+    ["自分が納得する品質を守る", "誰でも同じ品質を出せるようにする"], ["細部をさらに磨く", "仕事の手順を整える"],
+    ["一つの完成度を上げる", "同じ結果を何度も出せるようにする"], ["職人の感覚を大切にする", "判断の基準を言葉にする"],
+    ["最高の一品をつくる", "安定して続く仕事をつくる"]
+  ]},
+  { types: ["T02", "T06"], items: [
+    ["仕事の流れを整える", "お金の流れを整える"], ["手順を先に決める", "回収の見込みを先に決める"],
+    ["現場が回る仕組みに使う", "利益が増える投資に使う"], ["無駄な作業を減らす", "無駄なお金を減らす"],
+    ["人が迷わない形をつくる", "数字で迷わない形をつくる"]
+  ]},
+  { types: ["T06", "T05"], items: [
+    ["数字が合うかを先に見る", "目指す未来に合うかを先に見る"], ["回収できる計画を選ぶ", "本当に実現したい計画を選ぶ"],
+    ["利益が残る方へ進む", "意味を感じる方へ進む"], ["現実的な資金計画を守る", "大きな構想を守る"],
+    ["お金から次の一手を決める", "未来像から次の一手を決める"]
+  ]},
+  { types: ["T05", "T09"], items: [
+    ["頭の中で未来を深く描く", "まず言葉にして周りへ伝える"], ["構想そのものを磨く", "構想の伝え方を磨く"],
+    ["実現したい景色を考える", "共感してくれる人を増やす"], ["自分の中で答えをつくる", "人に話しながら答えをつくる"],
+    ["目指す未来を形にする", "目指す未来を言葉で広げる"]
+  ]},
+  { types: ["T09", "T03"], items: [
+    ["自分の言葉で人を動かす", "役割を渡して人を動かす"], ["発信して仲間を集める", "一人ずつ任せて仲間を育てる"],
+    ["会社の考えを伝える", "チームの動きを整える"], ["まず話して熱を伝える", "まず担当を決めて動かす"],
+    ["自分が前に立って伝える", "仲間が動ける場をつくる"]
+  ]},
+  { types: ["T03", "T08"], items: [
+    ["チーム全体が動くことを見る", "困っている一人を見る"], ["役割を決めて解決する", "まず相手の話を聞いて解決する"],
+    ["組織の力を大きくする", "助けられる人を増やす"], ["仲間へ仕事を任せる", "自分も近くで手を差し伸べる"],
+    ["人をまとめて前へ進む", "人の困りごとから前へ進む"]
+  ]},
+  { types: ["T08", "T10"], items: [
+    ["新しい困りごとへ手を伸ばす", "今ある信頼関係を守る"], ["助けが必要な人を優先する", "長く支えてくれた人を優先する"],
+    ["社会に必要な仕事を始める", "会社の大切な仕事を残す"], ["変えることで人を助ける", "続けることで人を守る"],
+    ["目の前の問題を解く", "長い関係を次へつなぐ"]
+  ]},
+  { types: ["T10", "T01"], items: [
+    ["今ある信用を守る", "新しい可能性を試す"], ["続いてきた仕事を残す", "まだない仕事を始める"],
+    ["関係を壊さずに進む", "多少の摩擦があっても進む"], ["会社の土台を守る", "会社の新しい柱をつくる"],
+    ["今いる人との約束を優先する", "次の機会をつかむことを優先する"]
+  ]},
+  { types: ["T01", "T07"], items: [
+    ["まず形にして試す", "まず完成度を上げる"], ["新しいものを次々つくる", "一つのものを深く磨く"],
+    ["速さを優先して出す", "品質を優先して待つ"], ["新しい案へ移る", "今の案をさらに良くする"],
+    ["未完成でも始める", "納得してから始める"]
+  ]},
+  { types: ["T04", "T02"], items: [
+    ["お客さんの反応に合わせて変える", "決めた手順を守って安定させる"], ["売れ方を見てすぐ動く", "数字と手順を見て落ち着いて動く"],
+    ["市場に合わせて柔軟に変える", "社内が混乱しない形へ整える"], ["まず販路を広げる", "まず受け入れる体制をつくる"],
+    ["売れる機会を逃さない", "仕事が崩れないことを優先する"]
+  ]},
+  { types: ["T07", "T06"], items: [
+    ["品質が上がるならお金をかける", "回収できる範囲で品質を上げる"], ["良いものをつくることから考える", "利益が残ることから考える"],
+    ["細部の価値を信じる", "数字で価値を確かめる"], ["仕上がりを理由に投資する", "回収の見込みを理由に投資する"],
+    ["商品の完成度を守る", "会社のお金を守る"]
+  ]},
+  { types: ["T02", "T05"], items: [
+    ["今の仕事が回る形を先につくる", "会社の行き先を先に決める"], ["手順を整えてから広げる", "目的を示してから広げる"],
+    ["できることを確実に積み上げる", "実現したい未来から逆算する"], ["毎日の仕事を良くする", "会社の未来を大きく描く"],
+    ["続けられる仕組みを選ぶ", "夢を実現できる方法を選ぶ"]
+  ]},
+  { types: ["T06", "T09"], items: [
+    ["数字で納得してもらう", "言葉で共感してもらう"], ["収支を見せて人を動かす", "物語を話して人を動かす"],
+    ["利益につながる説明をする", "思いが伝わる説明をする"], ["数字を整えて信用を得る", "発信を続けて信用を得る"],
+    ["お金の計画から話す", "会社の考えから話す"]
+  ]},
+  { types: ["T05", "T03"], items: [
+    ["自分が描く未来を守る", "仲間が納得する進め方を選ぶ"], ["構想を深める時間を取る", "人と話して役割を決める"],
+    ["まず行き先を決める", "まず一緒に動く人を決める"], ["強い思いで引っ張る", "仲間の力を集めて進む"],
+    ["理想の姿から考える", "今いる人の得意から考える"]
+  ]},
+  { types: ["T09", "T08"], items: [
+    ["まず自分の考えを伝える", "まず相手の困りごとを聞く"], ["広く発信して人を集める", "必要な人へ近くから届ける"],
+    ["言葉で問題を知らせる", "行動で問題を小さくする"], ["共感を増やすことを優先する", "実際に助かることを優先する"],
+    ["会社の思いを語る", "相手の声を仕事に変える"]
+  ]},
+  { types: ["T03", "T10"], items: [
+    ["新しい役割へ人を動かす", "今ある関係を守って進む"], ["組織を変えて前へ進む", "会社の文化を残して前へ進む"],
+    ["人を入れ替えてでも進める", "長くいる人を生かして進める"], ["今のチームを成長させる", "今のチームを安心させる"],
+    ["役割を変えることをためらわない", "信頼を壊す変更は避ける"]
+  ]},
+  { types: ["T08", "T01"], items: [
+    ["困っている人が見える仕事を始める", "まだ誰も気づかない機会を試す"], ["必要とされることから考える", "面白い可能性から考える"],
+    ["一人の問題を深く解く", "新しい市場を広く探す"], ["役に立てる確かさを優先する", "新しさと可能性を優先する"],
+    ["困りごとを仕事へ変える", "アイデアを仕事へ変える"]
+  ]},
+  { types: ["T10", "T04"], items: [
+    ["長く選ばれる信用を守る", "今すぐ選ばれる売り方を試す"], ["取引先との関係を優先する", "新しいお客さんの反応を優先する"],
+    ["変えない良さを残す", "売れる形へ素早く変える"], ["一時の売上より長い関係を取る", "機会を逃さず売上を取りに行く"],
+    ["会社らしさを守って売る", "市場に合わせて売り方を変える"]
+  ]}
+];
+
+// 現行100問は、内容監査しやすいよう questions.js に分離する。
+const PAIR_BANK = typeof module !== "undefined" && module.exports
+  ? require("./questions.js")
+  : globalThis.CURRENT_PAIR_BANK;
+
+// 外部参照用の現行質問プール。旧版は履歴確認のため別名で残す。
+const QUESTION_BANK = PAIR_BANK;
+
 function shuffle(items) {
   const copy = items.slice();
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -281,21 +388,24 @@ function advisorTeamFor(mainId) {
 }
 
 function createQuestionSession() {
-  return shuffle(Object.entries(QUESTION_BANK).flatMap(([typeId, questions]) =>
-    shuffle(questions).slice(0, 2).map((q, index) => ({
-      id: `${typeId}-${index}-${questions.indexOf(q)}`,
-      scene: "ふだんの仕事で",
-      q,
+  return shuffle(PAIR_BANK.map((pair, pairIndex) => {
+    const variant = shuffle(pair.items)[0];
+    const focus = Array.isArray(variant) ? variant[0] : variant.a;
+    const other = Array.isArray(variant) ? variant[1] : variant.b;
+    return {
+      id: `pair-${pairIndex}-${pair.items.indexOf(variant)}`,
+      scene: variant.scene || "ふだんの仕事で",
+      q: variant.q || `「${focus}」を「${other}」より優先することが多い。`,
       a: ["はい", "どちらでもない", "いいえ"],
-      type: [typeId, null, null]
-    }))
-  ));
+      hints: [focus, null, other],
+      type: [pair.types[0], null, pair.types[1]],
+      pair: pair.types.slice()
+    };
+  }));
 }
 
-// テストや軸の理論値用。実際の画面は createQuestionSession() を使う。
-const BASE = Object.entries(QUESTION_BANK).flatMap(([typeId, questions]) => questions.map((q, index) => ({
-  id: `${typeId}-${index}`, scene: "ふだんの仕事で", q, a: ["はい", "どちらでもない", "いいえ"], type: [typeId, null, null]
-})));
+// 互換参照用。実際の画面もテストも createQuestionSession() を使う。
+const BASE = PAIR_BANK;
 
 // 最後の5問は「タイプ」ではなく、今の困りごとを確認する。ここも3択で統一する。
 const CHECKS = [
@@ -346,44 +456,116 @@ function buildExtraQuestion(topTwoIds, slot) {
   return buildFallbackExtra(topTwoIds[0], topTwoIds[1], slot);
 }
 
-// --- タイプ得点（フラットな加算のみ。副次加点なし） ---
-function scoreTypes(chosenTypeLog) {
-  // chosenTypeLog: 選ばれた選択肢の type 文字列の配列（BASE分＋あれば追加質問分）
+// --- タイプ得点（20組の比較回答から算出） ---
+function scoreTypeMap(answerLog) {
   const counts = Object.fromEntries(Object.keys(TYPES).map(id => [id, 0]));
-  chosenTypeLog.filter(Boolean).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-  return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-}
-
-// 「接戦」の暫定定義：上位2タイプの得点差が1点以内（0〜6点という狭いレンジのため、
-// 差0または1を接戦とみなす。差2以上は明確な差とみなす）。この数値は引き継ぎ文書に明記する。
-function isNearTie(ranks) {
-  return ranks[0][1] - ranks[1][1] <= 1;
-}
-
-// --- 8軸「今回の回答傾向」（タイプ得点と独立。BASE15問の回答だけから計算） ---
-function axisRaw(answerLog) {
-  const axes = Array(8).fill(0);
-  answerLog.forEach(({ typeId, answerIndex }) => {
-    const answerWeight = [2, 1, 0][answerIndex] ?? 0;
-    (AXIS_MAP[typeId] || []).forEach(([axisIndex, weight]) => { axes[axisIndex] += weight * answerWeight; });
+  answerLog.forEach(answer => {
+    if (!answer || typeof answer !== "object") return;
+    if (!(answer.yesType in counts) || !(answer.noType in counts)) return;
+    const value = [2, 0, -2][answer.answerIndex] ?? 0;
+    counts[answer.yesType] += value;
+    counts[answer.noType] -= value;
   });
-  return axes;
+  return counts;
 }
-// 1回の診断では各タイプを2問ずつ出すため、その20問における理論上の最大値。
+function scoreTypes(answerLog) {
+  const counts = scoreTypeMap(answerLog);
+  const wins = Object.fromEntries(Object.keys(TYPES).map(id => [id, 0]));
+  const tieBreak = Object.fromEntries(Object.keys(TYPES).map(id => [id, 0]));
+  answerLog.forEach(answer => {
+    if (!answer || typeof answer !== "object") return;
+    if (!(answer.yesType in counts) || !(answer.noType in counts)) return;
+    if (answer.answerIndex === 0) {
+      wins[answer.yesType] += 1;
+      tieBreak[answer.yesType] += counts[answer.noType] + 8;
+    } else if (answer.answerIndex === 2) {
+      wins[answer.noType] += 1;
+      tieBreak[answer.noType] += counts[answer.yesType] + 8;
+    } else {
+      // 同じくらいを選んだ比較も、相手の強さを半分ずつ反映する。
+      tieBreak[answer.yesType] += (counts[answer.noType] + 8) / 2;
+      tieBreak[answer.noType] += (counts[answer.yesType] + 8) / 2;
+    }
+  });
+  // 同点なら、優先した回数、さらに「全体得点の高い相手との比較」を順に見る。
+  // それでも同じ場合は結果画面で「同じくらい」と明示する。
+  return Object.entries(counts)
+    .map(([id, score]) => [id, score, wins[id], tieBreak[id]])
+    .sort((a, b) => b[1] - a[1] || b[2] - a[2] || b[3] - a[3]);
+}
+
+function classifyTypeResult(answerLog) {
+  const ranks = scoreTypes(answerLog);
+  const signalCount = answerLog.filter(answer => answer && answer.answerIndex !== 1).length;
+  const flatScores = ranks[0][1] === ranks[ranks.length - 1][1];
+  const rawTie = ranks[0][1] === ranks[1][1];
+  const tieCount = ranks.filter(row => row[1] === ranks[0][1]).length;
+  const unresolvedTie = ranks[0][1] === ranks[1][1]
+    && ranks[0][2] === ranks[1][2]
+    && ranks[0][3] === ranks[1][3];
+  // 四つの比較で一つのタイプを一貫して選んだ場合（最高8点）は有効。
+  // 無情報、回答癖だけの平坦な回答、最高点が弱い回答は無理に型へ当てはめない。
+  const lowSignal = flatScores || signalCount < 4 || ranks[0][1] < 4 || tieCount > 3;
+  return { ranks, signalCount, flatScores, rawTie, tieCount, unresolvedTie, lowSignal, mixedTop: !lowSignal && tieCount >= 2 };
+}
+
+// 互換用。「接戦」は上位2タイプの差が、比較1回分（2点）以内。
+function isNearTie(ranks) {
+  return ranks[0][1] - ranks[1][1] <= 2;
+}
+
+// --- 8軸「今回の回答傾向」 ---
+// 各タイプは4つの比較に登場し、得点範囲は-8〜+8。
+// 50点を中立として、関連タイプの相対的な強弱を5〜95点へ写す。
+function axisRaw(answerLog) {
+  const typeScores = scoreTypeMap(answerLog);
+  const axes = Array(8).fill(0), totals = Array(8).fill(0);
+  Object.entries(typeScores).forEach(([typeId, score]) => {
+    (AXIS_MAP[typeId] || []).forEach(([axisIndex, weight]) => {
+      axes[axisIndex] += (score / 8) * weight;
+      totals[axisIndex] += weight;
+    });
+  });
+  return axes.map((value, index) => totals[index] ? value / totals[index] : 0);
+}
+function axisWeight(typeId, axisIndex) {
+  const found = (AXIS_MAP[typeId] || []).find(([index]) => index === axisIndex);
+  return found ? found[1] : 0;
+}
+// 各軸は対応タイプ数が違うため、そのままでは動ける幅が不揃いになる。
+// 20比較から到達できる各軸の理論最大値を求め、どの軸も同じ5〜95の幅で表示する。
 const AXIS_THEORETICAL_MAX = AXES.map((_, axisIndex) => {
-  return Object.keys(TYPES).reduce((sum, typeId) => {
-    const entry = (AXIS_MAP[typeId] || []).find(([ai]) => ai === axisIndex);
-    return sum + (entry ? entry[1] * 2 * 2 : 0);
+  const totalWeight = Object.keys(TYPES).reduce((sum, id) => sum + axisWeight(id, axisIndex), 0);
+  const difference = PAIR_BANK.reduce((sum, pair) => {
+    return sum + Math.abs(axisWeight(pair.types[0], axisIndex) - axisWeight(pair.types[1], axisIndex));
   }, 0);
+  return totalWeight ? difference / (4 * totalWeight) : 1;
+});
+// 無作為に3択したときの標準偏差を、20比較の係数から厳密に算出する。
+// 理論最大値だけでなく通常回答の散らばりもそろえることで、特定軸だけが
+// 「最も強い」「70点以上」になりやすい問題を防ぐ。
+const AXIS_RANDOM_STD = AXES.map((_, axisIndex) => {
+  const totalWeight = Object.keys(TYPES).reduce((sum, id) => sum + axisWeight(id, axisIndex), 0);
+  if (!totalWeight) return 1;
+  const coefficientSquares = PAIR_BANK.reduce((sum, pair) => {
+    const difference = axisWeight(pair.types[0], axisIndex) - axisWeight(pair.types[1], axisIndex);
+    const coefficient = difference / (8 * totalWeight);
+    return sum + coefficient * coefficient;
+  }, 0);
+  // 比較の値は +2 / 0 / -2 が等確率なので、分散は8/3。
+  return Math.sqrt(coefficientSquares * 8 / 3);
 });
 function normalizedAxes(answerLog) {
   const raw = axisRaw(answerLog);
-  return raw.map((v, i) => AXIS_THEORETICAL_MAX[i] ? Math.round((v / AXIS_THEORETICAL_MAX[i]) * 100) : 0);
+  return raw.map((value, index) => {
+    const standardized = AXIS_RANDOM_STD[index] ? value / AXIS_RANDOM_STD[index] : 0;
+    return Math.round(Math.max(5, Math.min(95, 50 + standardized * 15)));
+  });
 }
 
-// --- 課題（issues）：CHECKS3問だけから判定。タイプ得点には混ぜない ---
+// --- 課題（issues）：CHECKS5問だけから判定。タイプ得点には混ぜない ---
 function scoreIssues(checkChoices) {
-  // checkChoices: [{index:0-3}, {index}, {index}] 3件、CHECKS配列と対応
+  // checkChoices: 0〜2の配列5件、CHECKS配列と対応
   const issues = {};
   const evidence = {}; // 課題名 -> 根拠となった質問IDの配列（重複IDは1件扱い）
   CHECKS.forEach((c, i) => {
@@ -415,11 +597,11 @@ function storyOfferEligible({ planStatus, audience, urgentPrimaryIssue }) {
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
-    TYPES, TYPE_DETAILS, HISTORICAL_PEOPLE, ADVISOR_TEAMS, ADVISOR_EXTRA_IDS, advisorTeamFor, AXES, AXIS_MAP, BASE, QUESTION_BANK, CHECKS, EXTRA_PAIRS,
+    TYPES, TYPE_DETAILS, HISTORICAL_PEOPLE, ADVISOR_TEAMS, ADVISOR_EXTRA_IDS, advisorTeamFor, AXES, AXIS_MAP, BASE, QUESTION_BANK, PAIR_BANK, CHECKS, EXTRA_PAIRS,
     createQuestionSession,
     buildExtraQuestion, buildFallbackExtra,
-    scoreTypes, isNearTie,
-    axisRaw, AXIS_THEORETICAL_MAX, normalizedAxes,
+    scoreTypeMap, scoreTypes, classifyTypeResult, isNearTie,
+    axisRaw, AXIS_THEORETICAL_MAX, AXIS_RANDOM_STD, normalizedAxes,
     scoreIssues, storyOfferEligible,
   };
 }
