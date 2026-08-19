@@ -1,0 +1,38 @@
+{
+  "id": "keieisha-shindan",
+  "version": "1.0.0",
+  "title": "経営者診断",
+  "description": "経営者の意思決定傾向を10タイプで診断し、現在の経営課題と事業段階を独立して分析し、補完人材や次の行動を提案するスキル。",
+  "origin": {
+    "created_by": "Codex",
+    "original_path": "skills/keieisha-shindan/SKILL.md",
+    "migrated_to_vault_by": "Claude Code",
+    "migrated_at": "2026-08-19"
+  },
+  "structure": {
+    "common": "common/procedures.md（共通手順）, common/data/scoring.json（採点データの正）",
+    "codex": "codex/SKILL.md（frontmatterと発動条件のみ）",
+    "claude-code": "claude-code/SKILL.md（frontmatterと発動条件のみ）",
+    "tests": "tests/README.md（テスト資産の現状）",
+    "audit": "audit/provenance.md（出典・移植記録）"
+  },
+  "exports": [
+    {
+      "target": "codex",
+      "path": "skills/keieisha-shindan/",
+      "status": "既存（Codexの実行コピー。今回の移植では変更していない）"
+    },
+    {
+      "target": "claude-code",
+      "path": ".claude/skills/keieisha-shindan/",
+      "status": "新規作成（common + claude-code/SKILL.md を書き出したもの）"
+    }
+  ],
+  "sync_policy": "common/ の内容を変更したら、codex/SKILL.md・claude-code/SKILL.md の差分を確認したうえで、両方の書き出し先へ手動で反映する。書き出し先を直接編集した場合は、vault側へ書き戻してから両方を再書き出しする。",
+  "known_gaps": [
+    "references/diagnostic-rules.md が未作成（SKILL.mdから参照されているが実体なし）",
+    "test-cases.md が未作成",
+    "naming.md が未作成",
+    "scripts/score_diagnostic.py が未作成"
+  ]
+}
