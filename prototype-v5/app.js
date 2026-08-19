@@ -1,7 +1,7 @@
 /* v5表示層。採点はすべて data.js の公開関数だけを利用する。 */
 const $ = selector => document.querySelector(selector);
 const state = {
-  index: 0, log: [], choices: [], checks: [], extra: [], questions: [],
+  index: 0, log: [], choices: [], checks: [], extra: [], questions: [], axisAnswers: [],
   name: "あなた", stage: "", planStatus: "none", audience: "",
   urgentPrimaryIssue: false, resultRanks: [], resultAxes: []
 };
@@ -33,6 +33,7 @@ function renderQuestion() {
 function answer(q, answerIndex) {
   const typeId = q.type[answerIndex];
   state.log.push(typeId);
+  if (state.index < state.questions.length) state.axisAnswers.push({ typeId: q.type[0], answerIndex });
   state.choices.push({ id: q.id || `extra-${state.extra.length}`, scene: q.scene, question: q.q, answer: q.a[answerIndex], typeId });
   state.index += 1;
   if (state.index < allQuestions().length) return renderQuestion();
@@ -44,6 +45,7 @@ function back() {
   if (!state.index) return;
   state.index -= 1;
   state.log.pop();
+  if (state.index < state.questions.length) state.axisAnswers.pop();
   state.choices.pop();
   if (state.index < state.questions.length && state.extra.length) state.extra = [];
   renderQuestion();
@@ -132,7 +134,7 @@ function result() {
   const mainDetail = TYPE_DETAILS[mainId], secondDetail = TYPE_DETAILS[secondId];
   const historical = HISTORICAL_PEOPLE[mainId];
   const issues = scoreIssues(state.checks);
-  const axes = normalizedAxes(state.log.slice(0, state.questions.length));
+  const axes = normalizedAxes(state.axisAnswers);
   const eligible = storyOfferEligible({ planStatus: state.planStatus, audience: state.audience, urgentPrimaryIssue: state.urgentPrimaryIssue });
   state.resultRanks = top;
   state.resultAxes = axes;
@@ -144,7 +146,7 @@ function result() {
   $("#topThree").innerHTML = top.map(([typeId], index) => `<span><small>${["一番近い", "次に強い", "もう一つの強み"][index]}</small><b>${TYPES[typeId].name}</b></span>`).join("");
   $("#combinationTitle").textContent = `${main.name} × ${second.name}`;
   $("#combinationText").textContent = `「${mainDetail.contribution}」と「${secondDetail.contribution}」の両方が出ています。思いつきを、途中で終わらない仕事へ変えやすい組み合わせです。`;
-  $("#axisList").innerHTML = AXES.map((axis, index) => `<span><b>${axis}</b><strong>${axes[index]}</strong><small>100点満点の回答傾向</small></span>`).join("");
+  $("#axisList").innerHTML = AXES.map((axis, index) => `<span><b>${axis}</b><strong>${axes[index]}点</strong><small>今回の回答から見た傾向</small></span>`).join("");
   drawRadar(axes);
   $("#historicalName").textContent = historical.name;
   $("#historicalType").textContent = main.name;
@@ -206,6 +208,7 @@ $("#startBtn").onclick = () => show("profile");
 $("#profileNext").onclick = () => {
   state.index = 0;
   state.log = [];
+  state.axisAnswers = [];
   state.choices = [];
   state.checks = [];
   state.extra = [];

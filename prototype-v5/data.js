@@ -191,21 +191,20 @@ const ADVISOR_EXTRA_IDS = {
 
 const AXES = ["新しいこと", "長く残すこと", "商品を磨くこと", "人を動かすこと", "市場を見ること", "数字を整えること", "自分の構想", "周りへの役立ち"];
 
-// タイプ→軸の対応（回答内容から8軸を独立集計するための固定表。タイプ得点の計算式とは別経路）。
-// 主軸に+3、副軸があれば+1。T09・T10のみ副軸を持たせているのは、
-// 「言葉で人を集める型」＝自分の構想を人に伝える(人を動かす+自分の構想)、
-// 「大切なものを残す型」＝長く残すこと+周りへの役立ち、という内容的な結びつきのため。
+// 回答→8軸の対応。旧版は1軸につき質問が2問しかなく、0/50/100に偏っていた。
+// 今回は全20問を複数の軸へ反映する。回答は「はい=2、どちらでもない=1、いいえ=0」。
+// 例えば「新しいこと」は、始める力だけでなく市場を見る・構想を描く回答も少し反映する。
 const AXIS_MAP = {
-  T01: [[0, 3]],
-  T02: [[1, 3]],
-  T03: [[3, 3]],
-  T04: [[4, 3]],
-  T05: [[6, 3]],
-  T06: [[5, 3]],
-  T07: [[2, 3]],
-  T08: [[7, 3]],
-  T09: [[3, 1], [6, 3]],
-  T10: [[1, 3], [7, 1]],
+  T01: [[0, 3], [4, 1], [6, 1]],
+  T02: [[1, 3], [5, 1], [3, 1]],
+  T03: [[3, 3], [1, 1], [6, 1]],
+  T04: [[4, 3], [0, 1], [2, 1]],
+  T05: [[6, 3], [0, 1], [1, 1]],
+  T06: [[5, 3], [4, 1], [1, 1]],
+  T07: [[2, 3], [1, 1], [4, 1]],
+  T08: [[7, 3], [3, 1], [1, 1]],
+  T09: [[6, 3], [3, 2], [4, 1]],
+  T10: [[1, 3], [7, 2], [2, 1]],
 };
 
 // v5.1: 旧15問4択は、言葉が難しく答える負担が大きかったため廃止。
@@ -362,10 +361,11 @@ function isNearTie(ranks) {
 }
 
 // --- 8軸「今回の回答傾向」（タイプ得点と独立。BASE15問の回答だけから計算） ---
-function axisRaw(chosenTypeLogBase) {
+function axisRaw(answerLog) {
   const axes = Array(8).fill(0);
-  chosenTypeLogBase.forEach(typeId => {
-    (AXIS_MAP[typeId] || []).forEach(([axisIndex, weight]) => { axes[axisIndex] += weight; });
+  answerLog.forEach(({ typeId, answerIndex }) => {
+    const answerWeight = [2, 1, 0][answerIndex] ?? 0;
+    (AXIS_MAP[typeId] || []).forEach(([axisIndex, weight]) => { axes[axisIndex] += weight * answerWeight; });
   });
   return axes;
 }
@@ -373,11 +373,11 @@ function axisRaw(chosenTypeLogBase) {
 const AXIS_THEORETICAL_MAX = AXES.map((_, axisIndex) => {
   return Object.keys(TYPES).reduce((sum, typeId) => {
     const entry = (AXIS_MAP[typeId] || []).find(([ai]) => ai === axisIndex);
-    return sum + (entry ? entry[1] * 2 : 0);
+    return sum + (entry ? entry[1] * 2 * 2 : 0);
   }, 0);
 });
-function normalizedAxes(chosenTypeLogBase) {
-  const raw = axisRaw(chosenTypeLogBase);
+function normalizedAxes(answerLog) {
+  const raw = axisRaw(answerLog);
   return raw.map((v, i) => AXIS_THEORETICAL_MAX[i] ? Math.round((v / AXIS_THEORETICAL_MAX[i]) * 100) : 0);
 }
 
