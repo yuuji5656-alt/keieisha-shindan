@@ -238,32 +238,32 @@ function result() {
   if (eligible) {
     const hasSourceMaterial = ["memo", "plan"].includes(state.planStatus);
     const material = state.planStatus === "plan" ? "事業計画書" : "構想のメモや資料";
+    const hasReader = !!state.audience;
     const customerRoute = ["お客様", "応援者"].includes(state.audience);
     const confirmedIssueKeys = ["言語化", "構想整理"].filter(key => issues[key] && issues[key].status === "確認できた");
     const issueClause = confirmedIssueKeys.length
       ? `今回の回答では、異なる質問の根拠から「${confirmedIssueKeys.join("」「")}」の課題が確認できました。`
       : "";
-    const readerClause = customerRoute
+    const readerClause = !hasReader ? "" : customerRoute
       ? `${state.audience}に事業を知ってほしい状態です。`
       : `${state.audience}へ伝えたい相手も決まっています。`;
-    const bodyClause = hasSourceMaterial
-      ? `${material}があり、${readerClause}計画にある店・商品・人の成長を連載へ変え、物語から実際の接点へつなぐ材料があります。`
-      : `${readerClause}資料がまだなくても、事業計画小説はその内容を整理しながら物語として形にする方法にもなります。`;
+    let bodyClause;
+    if (hasSourceMaterial && hasReader) {
+      bodyClause = `${material}があり、${readerClause}計画にある店・商品・人の成長を連載へ変え、物語から実際の接点へつなぐ材料があります。`;
+    } else if (hasSourceMaterial) {
+      bodyClause = `${material}があります。届けたい相手がまだ定まっていなくても、物語にする過程で「誰に届けたいか」が見えてくることもあります。`;
+    } else if (hasReader) {
+      bodyClause = `${readerClause}資料がまだなくても、事業計画小説はその内容を整理しながら物語として形にする方法にもなります。`;
+    } else {
+      bodyClause = "事業計画や届けたい相手がまだ決まっていなくても、事業計画小説はゼロから一緒に整理していく入口になります。";
+    }
     const stageHook = state.stage && STAGE_STORY_HOOK[state.stage] ? STAGE_STORY_HOOK[state.stage] : "";
     $("#storyReason").textContent = `${issueClause}${bodyClause}${stageHook}`;
-  } else if (state.urgentPrimaryIssue) {
+  } else {
+    // eligibleがfalseになるのは緊急課題があるときだけ。ここでは営業色を出さない。
     $("#otherTitle").textContent = "まずは、緊急対応を優先してください";
     $("#otherText").textContent = "資金繰り・法律・人の問題は、関係者や専門家への相談を先に。落ち着いてから、今週の一歩へ戻れば大丈夫です。";
-  } else if (state.planStatus === "none") {
-    $("#otherTitle").textContent = "まず、構想を一枚に書いてみる";
-    $("#otherText").textContent = "誰に、何を届け、どんな変化を起こしたいか。この3つを一枚に書くと、次に必要な方法を選びやすくなります。";
-  } else {
-    $("#otherTitle").textContent = "まず、届けたい相手を一人に決める";
-    $("#otherText").textContent = "社員、お客様、採用候補など、最初に分かってほしい相手を一人に絞ると、必要な説明や物語が見えてきます。";
   }
-  // 緊急課題があるときだけは、事業計画小説への言及も控える（funnel-design.mdの「提案しない条件」）。
-  $("#otherStoryNote").hidden = eligible || state.urgentPrimaryIssue;
-  $("#otherStoryLink").hidden = eligible || state.urgentPrimaryIssue;
   $("#shareBlock").hidden = lowSignal;
   show("result");
 }

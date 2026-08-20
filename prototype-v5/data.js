@@ -619,16 +619,14 @@ const STAGE_STORY_HOOK = {
   "承継": "引き継がれていく想いを、次の世代や関係者に届く形にできます。",
 };
 
-// --- 事業計画小説の主提案条件 ---
-// 診断タイプでは誘導しない。制作の材料（計画書・構想メモ、または診断で確認できた
-// 言語化・構想整理の課題）と、届けたい相手が実在するかで判定する。
-function storyOfferEligible({ planStatus, audience, urgentPrimaryIssue, issues }) {
-  const hasSourceMaterial = ["memo", "plan"].includes(planStatus);
-  const hasDiagnosedNeed = !!(issues && ["言語化", "構想整理"].some(
-    key => issues[key] && issues[key].status === "確認できた"
-  ));
-  const hasReader = !!audience;
-  return (hasSourceMaterial || hasDiagnosedNeed) && hasReader && !urgentPrimaryIssue;
+// --- 事業計画小説の提案を見せるかどうか ---
+// 診断タイプでは誘導しない。制作の材料や届けたい相手の有無は、提案を
+// 見せる/見せないの判定には使わない（まだ材料が揃っていない人ほど、
+// 提案を知る機会を奪われるべきではないため）。唯一の例外は緊急課題
+// （資金繰り・法律・人の問題）があるときで、そのときは営業色を出さず
+// 専門家への相談を先に案内する。
+function storyOfferEligible({ urgentPrimaryIssue }) {
+  return !urgentPrimaryIssue;
 }
 
 if (typeof module !== "undefined" && module.exports) {

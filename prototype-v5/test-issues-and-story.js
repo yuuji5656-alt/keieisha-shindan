@@ -1,8 +1,9 @@
-// v5 採点検証：現在課題の可変性、事業計画小説の主提案条件分岐
+// v5 採点検証：現在課題の可変性、事業計画小説の提案表示条件
 //
 // オーナー指示(2026-08-18追記分)の必須確認項目のうち、次の2点を検証する。
 //   - 同じタイプでも課題回答で課題結果が変わる
-//   - 小説主提案の適合・非適合が条件どおりに分かれる
+//   - 小説の提案表示・非表示が条件どおりに分かれる（2026-08-20改訂：
+//     緊急課題以外は必ず見せる方式に変更。詳細はstoryOfferEligible参照）
 const { CHECKS, scoreIssues, storyOfferEligible } = require('./data.js');
 
 function main() {
@@ -26,19 +27,13 @@ function main() {
   console.log(evidenceRuleOk ? '→ PASS: 根拠件数に応じて確認できた/参考が切り替わる' : '→ FAIL');
   if (!evidenceRuleOk) allPass = false;
 
-  console.log('\n=== 事業計画小説の主提案条件 ===');
+  console.log('\n=== 事業計画小説の提案を見せるか（2026-08-20改訂：緊急課題以外は必ず見せる） ===');
+  // 制作材料・届けたい相手の有無は、提案を見せる/見せないの判定には使わない
+  // （storyReasonの文面をapp.js側で個別化するだけ）。見せない例外は
+  // 緊急課題があるときだけ（専門家相談を優先するため）。
   const cases = [
-    { name: '適合(計画書＋お客様)', input: { planStatus: 'plan', audience: 'お客様', urgentPrimaryIssue: false }, expect: true },
-    { name: '適合(構想メモ＋社員)', input: { planStatus: 'memo', audience: '社員', urgentPrimaryIssue: false }, expect: true },
-    { name: '不適合(制作材料なし)', input: { planStatus: 'none', audience: 'お客様', urgentPrimaryIssue: false }, expect: false },
-    { name: '不適合(届けたい相手なし)', input: { planStatus: 'plan', audience: '', urgentPrimaryIssue: false }, expect: false },
-    { name: '不適合(緊急の資金繰り等が主課題)', input: { planStatus: 'plan', audience: '社員', urgentPrimaryIssue: true }, expect: false },
-    { name: '適合(事業段階・タイプに依存しない)', input: { planStatus: 'plan', audience: '応援者', urgentPrimaryIssue: false }, expect: true },
-    { name: '適合(資料なし・診断で言語化を確認できた)', input: { planStatus: 'none', audience: '社員', urgentPrimaryIssue: false, issues: { 言語化: { status: '確認できた' } } }, expect: true },
-    { name: '適合(資料なし・診断で構想整理を確認できた)', input: { planStatus: 'none', audience: '採用候補', urgentPrimaryIssue: false, issues: { 構想整理: { status: '確認できた' } } }, expect: true },
-    { name: '不適合(資料なし・課題は参考どまり)', input: { planStatus: 'none', audience: '社員', urgentPrimaryIssue: false, issues: { 言語化: { status: '参考' } } }, expect: false },
-    { name: '不適合(資料なし・診断課題あっても届けたい相手なし)', input: { planStatus: 'none', audience: '', urgentPrimaryIssue: false, issues: { 言語化: { status: '確認できた' } } }, expect: false },
-    { name: '不適合(資料なし・診断課題あっても緊急課題が優先)', input: { planStatus: 'none', audience: '社員', urgentPrimaryIssue: true, issues: { 言語化: { status: '確認できた' } } }, expect: false },
+    { name: '見せる(緊急課題なし。資料・相手の有無は問わない)', input: { urgentPrimaryIssue: false }, expect: true },
+    { name: '見せない(緊急の資金繰り等が主課題)', input: { urgentPrimaryIssue: true }, expect: false },
   ];
   const rows = {};
   cases.forEach(c => {
