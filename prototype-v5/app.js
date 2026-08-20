@@ -263,6 +263,7 @@ function result() {
   }
   // 緊急課題があるときだけは、事業計画小説への言及も控える（funnel-design.mdの「提案しない条件」）。
   $("#otherStoryNote").hidden = eligible || state.urgentPrimaryIssue;
+  $("#otherStoryLink").hidden = eligible || state.urgentPrimaryIssue;
   $("#shareBlock").hidden = lowSignal;
   show("result");
 }
