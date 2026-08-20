@@ -189,7 +189,7 @@ function result() {
   const historicalIds = tiedIds;
   $("#historicalCards").innerHTML = historicalIds.map(typeId => {
     const person = HISTORICAL_PEOPLE[typeId];
-    return `<div class="historical-card"><h2>${person.name}</h2><b>${TYPES[typeId].name}</b><p>${person.role}</p><p>${person.reason}</p></div>`;
+    return `<div class="historical-card"><h2>${person.name}</h2><b>${TYPES[typeId].name}</b><p class="note">${person.bio}</p><p>${person.role}</p><p>${person.reason}</p></div>`;
   }).join("");
   $("#strengthTitle").textContent = mixedTop ? tiedDetails.map(detail => detail.contribution).join("／") : mainDetail.contribution;
   $("#strength").textContent = mixedTop ? tiedTypes.map(type => type.strength).join(" また、") : main.strength;
@@ -217,7 +217,7 @@ function result() {
   const advisorTeam = advisorCandidates.slice(0, 3);
   $("#advisorCards").innerHTML = advisorTeam.map(advisor => {
     const person = HISTORICAL_PEOPLE[advisor.typeId];
-    return `<article><h3>${person.name}</h3><b>${TYPES[advisor.typeId].name}</b><p>${person.role}</p><p>${advisor.why}</p></article>`;
+    return `<article><h3>${person.name}</h3><b>${TYPES[advisor.typeId].name}</b><p class="note">${person.bio}</p><p>${person.role}</p><p>${advisor.why}</p></article>`;
   }).join("");
   $("#perceivedText").textContent = mixedTop ? tiedDetails.map(detail => detail.perceivedAs).join(" また、") : mainDetail.perceivedAs;
 
