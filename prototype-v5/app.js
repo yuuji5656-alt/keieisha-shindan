@@ -261,6 +261,8 @@ function result() {
     $("#otherTitle").textContent = "まず、届けたい相手を一人に決める";
     $("#otherText").textContent = "社員、お客様、採用候補など、最初に分かってほしい相手を一人に絞ると、必要な説明や物語が見えてきます。";
   }
+  // 緊急課題があるときだけは、事業計画小説への言及も控える（funnel-design.mdの「提案しない条件」）。
+  $("#otherStoryNote").hidden = eligible || state.urgentPrimaryIssue;
   $("#shareBlock").hidden = lowSignal;
   show("result");
 }
