@@ -199,6 +199,12 @@ function result() {
   const accidentItems = mixedTop ? tiedDetails.flatMap(detail => detail.accidents.slice(0, itemsPerType)) : mainDetail.accidents;
   $("#fitList").innerHTML = [...new Set(fitItems)].slice(0, 4).map(item => `<li>${item}</li>`).join("");
   $("#accidentList").innerHTML = [...new Set(accidentItems)].slice(0, 4).map(item => `<li>${item}</li>`).join("");
+  $("#growthText").textContent = mixedTop ? tiedDetails.map(detail => detail.growthFocus).join(" また、") : mainDetail.growthFocus;
+  const compatIds = mixedTop
+    ? [...new Set(tiedDetails.flatMap(detail => detail.partners))].filter(id => !tiedIds.includes(id))
+    : mainDetail.partners;
+  $("#compatTitle").textContent = compatIds.map(id => TYPES[id].name).join(" ／ ");
+  $("#compatText").textContent = mixedTop ? tiedDetails.map(detail => detail.partnerReason).join(" また、") : mainDetail.partnerReason;
   const advisorSource = mixedTop ? tiedIds.flatMap(typeId => advisorTeamFor(typeId)) : advisorTeamFor(mainId);
   const advisorCandidates = advisorSource.filter((advisor, index, list) =>
     !historicalIds.includes(advisor.typeId) && list.findIndex(item => item.typeId === advisor.typeId) === index
@@ -213,6 +219,7 @@ function result() {
     const person = HISTORICAL_PEOPLE[advisor.typeId];
     return `<article><h3>${person.name}</h3><b>${TYPES[advisor.typeId].name}</b><p>${person.role}</p><p>${advisor.why}</p></article>`;
   }).join("");
+  $("#perceivedText").textContent = mixedTop ? tiedDetails.map(detail => detail.perceivedAs).join(" また、") : mainDetail.perceivedAs;
 
   const entries = Object.entries(issues).sort((a, b) => b[1].score - a[1].score);
   const lead = entries[0];
