@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f7efe2">
   <title>経営の現在地診断</title>
-  <meta name="description" content="100通りの仕事場面から毎回20問。最後に今の困りごとを5問確認し、経営の癖・強み・つまずきやすい場面・今週の一手を整理する無料診断です。">
+  <meta name="description" content="仕事でよくある場面を20問。最後に今の困りごとを5問聞いて、決め方のクセ・強み・つまずきやすい場面・今週やることを整理する無料診断です。">
   <link rel="stylesheet" href="styles.css?v=20260912a">
 </head>
 <body>
@@ -45,31 +45,31 @@
     </section>
 
     <section id="check" class="screen form">
-      <div class="guide"><i class="cat black"></i><p>タイプとは別に、いま起きていることを5つだけ確認します。</p></div>
+      <div class="guide"><i class="cat black"></i><p>タイプとは別に、今起きていることを5つだけ聞きます。</p></div>
       <div class="card question"><p id="checkStep" class="eyebrow"></p><h1 id="checkQuestion"></h1><div id="checkAnswers" class="answers"></div><button id="checkBack" class="back">← 一つ戻る</button></div>
     </section>
 
     <section id="result" class="screen result">
       <div class="result-head"><i class="cat black large"></i><p><span id="resultName"></span>さんの、今回の回答から見た</p><h1 id="mainType"></h1><h2 id="tagline"></h2><p id="mix"></p><div id="topThree" class="top-three"></div></div>
       <div class="result-body">
-        <section id="storyOffer" class="story-offer" hidden><p class="eyebrow">今回の回答とは別に、事業の状況から</p><h2>その事業計画、連載物語にできるかもしれません。</h2><p id="storyReason"></p><p>計画を飾るためではありません。事実を土台に登場人物と出来事を設計し、続きを待つ読者と、店・商品・活動の接点を育てる方法です。</p><a class="primary" href="../prototype/story-plan.html">実例と仕組みを見る <b>→</b></a><a href="../prototype/story-preview.html" class="text-link">無料公開の物語を読む</a></section>
+        <section id="storyOffer" class="story-offer" hidden><p class="eyebrow">今回の回答とは別に、事業の状況から</p><h2>その事業計画、物語にできるかもしれません。</h2><p id="storyReason"></p><p>計画をかっこよく見せるためではありません。本当のことを土台に登場人物と出来事を考えて、続きを待つ読者と、お店や商品との出会いを作る方法です。</p><a class="primary" href="../prototype/story-plan.html">実例と仕組みを見る <b>→</b></a><a href="../prototype/story-preview.html" class="text-link">無料公開の物語を読む</a></section>
         <section id="otherOffer" class="result-card" hidden><p class="eyebrow">今回の回答とは別に、事業の状況から</p><h2 id="otherTitle"></h2><p id="otherText"></p></section>
         <section class="result-card combination type-specific"><p class="eyebrow">あなたらしさは、組み合わせに出る</p><h2 id="combinationTitle"></h2><p id="combinationText"></p></section>
-        <section class="result-card"><p class="eyebrow">回答の見取り図</p><h2>どんな選び方が強く出た？</h2><p id="axisSummary"></p><canvas id="radar" width="620" height="470"></canvas><div id="axisList" class="axis-list"></div><p class="note">50点が中間です。能力の優劣ではなく、今回どの考え方を優先したかを表しています。</p></section>
-        <section class="result-card historical type-specific"><p class="eyebrow">歴史でたとえるなら</p><div id="historicalCards" class="historical-grid"></div><p class="note">性格が同じという意味ではなく、経営の戦い方をたとえています。</p></section>
+        <section class="result-card"><p class="eyebrow">回答の見取り図</p><h2>どんな選び方が強く出た？</h2><p id="axisSummary"></p><canvas id="radar" width="620" height="470"></canvas><div id="axisList" class="axis-list"></div><p class="note">50点がまん中です。能力の高い低いではなく、今回どの考え方をよく選んだかを表しています。</p></section>
+        <section class="result-card historical type-specific"><p class="eyebrow">歴史でたとえるなら</p><div id="historicalCards" class="historical-grid"></div><p class="note">性格が同じという意味ではありません。仕事の進め方をたとえています。</p></section>
         <section class="result-card split type-specific"><div><p class="eyebrow">力が生きる場面</p><h2 id="strengthTitle"></h2><p id="strength"></p></div><div><p class="eyebrow">強く出すぎると</p><h2>気をつけたいこと</h2><p id="risk"></p></div></section>
-        <section class="result-card type-specific"><p class="eyebrow">次に伸ばすといいこと</p><h2>今回のタイプから見た学びどころ</h2><p id="growthText"></p></section>
-        <section class="result-card manual type-specific"><p class="eyebrow">あなたの取扱説明書</p><h2>うまくいく場所と、事故が起きる場所</h2><div class="manual-grid"><div><h3>力を出しやすい環境</h3><ul id="fitList"></ul></div><div><h3>起きやすい事故</h3><ul id="accidentList"></ul></div></div></section>
-        <section class="result-card type-specific"><p class="eyebrow">経営パートナーとして特に相性が良いのは</p><h2 id="compatTitle"></h2><p id="compatText"></p><p class="note">得意分野の違いから見た組み合わせの目安です。実際の相性は人柄や状況にもよります。</p></section>
+        <section class="result-card type-specific"><p class="eyebrow">次に伸ばすといいこと</p><h2>これから学ぶといいこと</h2><p id="growthText"></p></section>
+        <section class="result-card manual type-specific"><p class="eyebrow">あなたの取扱説明書</p><h2>うまくいく場所と、事故が起きる場所</h2><div class="manual-grid"><div><h3>力を出しやすい場所</h3><ul id="fitList"></ul></div><div><h3>起きやすい事故</h3><ul id="accidentList"></ul></div></div></section>
+        <section class="result-card type-specific"><p class="eyebrow">一緒に組むと特に相性が良いのは</p><h2 id="compatTitle"></h2><p id="compatText"></p><p class="note">得意なことの違いから見た組み合わせの目安です。実際の相性は、人柄や状況にもよります。</p></section>
         <section class="result-card advisors type-specific"><p class="eyebrow">あなたの近くに置く3人</p><h2>一人で全部やらなくていい</h2><div id="advisorCards" class="advisor-grid"></div></section>
-        <section class="result-card type-specific"><p class="eyebrow">まわりからの見えやすさ</p><h2>社員や周囲からは、こう見えやすい</h2><p id="perceivedText"></p><p class="note">実際のアンケート結果ではなく、タイプ傾向から推測される「見えやすい印象」です。</p></section>
+        <section class="result-card type-specific"><p class="eyebrow">まわりからどう見えるか</p><h2>社員や周りからは、こう見えやすい</h2><p id="perceivedText"></p><p class="note">実際にアンケートを取った結果ではありません。タイプから考えられる「見えやすい印象」です。</p></section>
         <section class="result-card"><p class="eyebrow">いまの状態</p><h2 id="issueTitle">今、先に整えたいこと</h2><div id="issues"></div><p id="issueText"></p><div class="action"><b>今週の一歩</b><h3 id="actionTitle"></h3><p id="actionText"></p></div></section>
-        <section id="shareBlock" class="share"><h2>結果を友だちに送る</h2><p>結果の概要を、LINEやXで共有できます。</p><div><button id="nativeShare">共有する</button><button id="lineShare">LINE</button><button id="xShare">X</button><button id="copyShare">リンクをコピー</button></div><small id="shareStatus"></small></section>
+        <section id="shareBlock" class="share"><h2>結果を友だちに送る</h2><p>結果のまとめを、LINEやXで送れます。</p><div><button id="nativeShare">共有する</button><button id="lineShare">LINE</button><button id="xShare">X</button><button id="copyShare">リンクをコピー</button></div><small id="shareStatus"></small></section>
         <button id="retry" class="retry">もう一度診断する</button>
       </div>
     </section>
   </main>
-  <footer>この診断は、医療・心理検査ではありません。現在の経営判断を振り返るための試作版です。</footer>
+  <footer>この診断は、医療や心理検査ではありません。今の決め方を振り返るための試作版です。</footer>
   <script src="questions.js?v=20260912a"></script>
   <script src="data.js?v=20260912a"></script>
   <script src="app.js?v=20260912a"></script>

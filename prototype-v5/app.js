@@ -164,7 +164,7 @@ function result() {
   $("#resultName").textContent = state.name;
   $("#mainType").textContent = lowSignal ? "まだ一つに絞れません" : tieCount === 3 ? "3つのタイプが同じくらい" : mixedTop ? `${main.name} × ${second.name}` : main.name;
   $("#tagline").textContent = lowSignal ? "今回の回答では、タイプの差が十分に出ませんでした。" : tieCount === 3 ? tiedTypes.map(type => type.name).join("・") : mixedTop ? "二つの考え方を、同じくらい使っています。" : main.tag;
-  $("#mix").textContent = lowSignal ? "無理に型を当てはめず、今回は回答の見取り図だけをお返しします。" : mixedTop ? `同点の${tieCount === 3 ? "三つ" : "二つ"}を中心に、上位3つの組み合わせで読み解きます。` : "一つの型で決めつけず、上位3つの組み合わせで読み解きます。";
+  $("#mix").textContent = lowSignal ? "無理に型を決めつけず、今回は回答の見取り図だけをお返しします。" : mixedTop ? `同じ点数の${tieCount === 3 ? "三つ" : "二つ"}を中心に、上位3つの組み合わせで見ていきます。` : "一つの型で決めつけず、上位3つの組み合わせで見ていきます。";
   $("#topThree").style.display = lowSignal ? "none" : "";
   document.querySelectorAll(".type-specific").forEach(card => { card.hidden = lowSignal; });
   const sameRank = (a, b) => a[1] === b[1];
@@ -182,7 +182,7 @@ function result() {
   const axisRange = axisOrder[0].value - axisOrder[axisOrder.length - 1].value;
   $("#axisSummary").textContent = axisRange < 8
     ? "今回は、八つの選び方に大きな差が出ませんでした。"
-    : `今回もっとも強く出たのは「${AXES[axisOrder[0].index]}」。一方、「${AXES[axisOrder[axisOrder.length - 1].index]}」は慎重に使う傾向です。`;
+    : `今回いちばん強く出たのは「${AXES[axisOrder[0].index]}」です。反対に「${AXES[axisOrder[axisOrder.length - 1].index]}」は控えめでした。`;
   const band = value => value >= 70 ? "強く出た" : value >= 56 ? "やや強い" : value >= 45 ? "中間" : value >= 30 ? "やや控えめ" : "控えめ";
   $("#axisList").innerHTML = AXES.map((axis, index) => `<span><b>${axis}</b><strong>${axes[index]}点</strong><small>${band(axes[index])}</small></span>`).join("");
   drawRadar(axes);
@@ -242,27 +242,27 @@ function result() {
     const customerRoute = ["お客様", "応援者"].includes(state.audience);
     const confirmedIssueKeys = ["言語化", "構想整理"].filter(key => issues[key] && issues[key].status === "確認できた");
     const issueClause = confirmedIssueKeys.length
-      ? `今回の回答では、異なる質問の根拠から「${confirmedIssueKeys.join("」「")}」の課題が確認できました。`
+      ? `今回の回答では、別々の質問から「${confirmedIssueKeys.join("」「")}」で困っていることが分かりました。`
       : "";
     const readerClause = !hasReader ? "" : customerRoute
-      ? `${state.audience}に事業を知ってほしい状態です。`
-      : `${state.audience}へ伝えたい相手も決まっています。`;
+      ? `${state.audience}に事業を知ってほしい、という状態です。`
+      : `${state.audience}という、伝えたい相手も決まっています。`;
     let bodyClause;
     if (hasSourceMaterial && hasReader) {
-      bodyClause = `${material}があり、${readerClause}計画にある店・商品・人の成長を連載へ変え、物語から実際の接点へつなぐ材料があります。`;
+      bodyClause = `${material}があり、${readerClause}計画にあるお店・商品・人の成長を物語に変えて、読んだ人が実際に足を運ぶところまでつなげられます。`;
     } else if (hasSourceMaterial) {
-      bodyClause = `${material}があります。届けたい相手がまだ定まっていなくても、物語にする過程で「誰に届けたいか」が見えてくることもあります。`;
+      bodyClause = `${material}があります。届けたい相手がまだ決まっていなくても、物語にしていく中で「誰に届けたいか」が見えてくることもあります。`;
     } else if (hasReader) {
-      bodyClause = `${readerClause}資料がまだなくても、事業計画小説はその内容を整理しながら物語として形にする方法にもなります。`;
+      bodyClause = `${readerClause}資料がまだなくても大丈夫です。話しながら中身を整理して、物語の形にしていけます。`;
     } else {
-      bodyClause = "事業計画や届けたい相手がまだ決まっていなくても、事業計画小説はゼロから一緒に整理していく入口になります。";
+      bodyClause = "事業計画も、届けたい相手も、まだ決まっていなくて大丈夫です。何もない所から一緒に整理していけます。";
     }
     const stageHook = state.stage && STAGE_STORY_HOOK[state.stage] ? STAGE_STORY_HOOK[state.stage] : "";
     $("#storyReason").textContent = `${issueClause}${bodyClause}${stageHook}`;
   } else {
     // eligibleがfalseになるのは緊急課題があるときだけ。ここでは営業色を出さない。
     $("#otherTitle").textContent = "まずは、緊急対応を優先してください";
-    $("#otherText").textContent = "資金繰り・法律・人の問題は、関係者や専門家への相談を先に。落ち着いてから、今週の一歩へ戻れば大丈夫です。";
+    $("#otherText").textContent = "お金・法律・人の問題は、まず関係者や専門家に相談してください。落ち着いてから、今週の一歩に戻れば大丈夫です。";
   }
   $("#shareBlock").hidden = lowSignal;
   show("result");
